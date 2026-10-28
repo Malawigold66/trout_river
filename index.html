@@ -42,6 +42,7 @@ input[type=checkbox]{width:16px;height:16px}
 #card .mec{font-size:13px;line-height:1.5;background:rgba(255,255,255,.06);border-radius:8px;padding:8px 10px;margin:8px 0}
 #card ul{margin:6px 0 4px;padding-left:18px;font-size:13px;line-height:1.55}
 #card .warn{font-size:11.5px;color:#f3c9a0;margin-top:8px}
+#card .src{font-size:11.5px;line-height:1.55;color:var(--mut);margin-top:8px}#card .src a{color:#9fd3e6;text-decoration:none}#card .src a:hover{text-decoration:underline}#card .note{font-size:11.5px;line-height:1.45;color:var(--mut);margin-top:6px;font-style:italic}
 #card .x{position:absolute;top:10px;right:10px;min-height:26px;padding:2px 9px}
 #labels{position:fixed;inset:0;pointer-events:none;z-index:5;overflow:hidden}
 .lbl{position:absolute;left:0;top:0;pointer-events:auto;display:flex;align-items:center;gap:6px;padding:4px 11px 4px 8px;min-height:26px;border-radius:999px;background:rgba(18,28,30,.62);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:12.5px;white-space:nowrap;cursor:pointer;transition:opacity .25s}
@@ -94,6 +95,30 @@ button.pop.on::after{content:" \25C2"}
 #rvYear input[type=range]{flex:1;min-width:120px;accent-color:#d97757}
 #rvYn{flex-basis:100%;text-align:center;font-size:10.5px;opacity:.85;line-height:1.3}
 @media (max-width:700px){#rvYn{display:none}#rvYear{bottom:14px}}
+/* ===== CSS POPFISH2 / NAVTACTILE1 ===== */
+#rvYear label{display:flex;align-items:center;gap:5px;flex:none}
+#rvYc{flex-basis:100%;text-align:center;font-size:11px;line-height:1.35}
+#rvYc:empty{display:none}
+#rvYear{transition:left .15s,width .15s}
+#rvYear #rvYs{flex:1 0 100%;order:3;width:100%;margin:2px 0}
+#rvYear #rvYgl{order:1;margin-left:auto}
+#rvYear #rvYf{order:2;flex:none;min-width:30px;padding:2px 8px;font-size:15px;line-height:1.2}
+#rvYear #rvYc{order:4}
+#rvYear #rvYn{order:5}
+#rvYear.fold{width:auto;padding:3px 4px;gap:0;border-radius:999px;background:rgba(40,52,58,.5)}
+#rvYear.fold>*:not(#rvYf){display:none}
+#rvYear select{padding:3px 4px;border-radius:7px;background:rgba(10,14,12,.55);color:#f1f1ea;border:1px solid rgba(255,255,255,.25);font-size:12px}
+#rvJoy,#rvUd{display:none;position:fixed;right:18px;z-index:6;touch-action:none;-webkit-user-select:none;user-select:none}
+#rvJoy{bottom:calc(96px + env(safe-area-inset-bottom,0px));width:112px;height:112px;border-radius:50%;background:rgba(40,52,58,.55);border:1px solid rgba(255,255,255,.3);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+#rvJk{position:absolute;left:36px;top:36px;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.78);pointer-events:none}
+#rvUd{bottom:calc(218px + env(safe-area-inset-bottom,0px));gap:10px;flex-direction:row}
+#rvUd button{width:50px;height:46px;border-radius:12px;font-size:18px;touch-action:none;background:rgba(40,52,58,.65);color:#fff;border:1px solid rgba(255,255,255,.3)}
+body.rv-touch #rvJoy{display:block}
+body.rv-touch #rvUd{display:flex}
+#rvYear{width:min(92vw,540px)}
+@media (min-width:900px){#rvYear{left:calc(50% - 15px)}}
+/* POPFISH5 : largeur FIXE, collee au panneau de gauche, au meme endroit que les panneaux soient ouverts ou fermes ; pastille repliee au centre */
+@media (min-width:900px){#rvYear{left:358px;width:min(760px,max(360px,calc(100vw - 756px)));transform:none}#rvYear.fold{left:50%;width:auto;transform:translateX(-50%)}}
 </style>
 </head>
 <body>
@@ -150,7 +175,7 @@ button.pop.on::after{content:" \25C2"}
     <details><summary data-t="couches"></summary><div id="couches"></div></details>
     <details><summary data-t="effets"></summary>
       <div id="effets"></div>
-      <div class="sl"><span data-t="halo"></span><b id="vHalo"></b><input type="range" id="sHalo" min="0" max="40" step="1" value="11"></div>
+      <div class="sl"><span data-t="halo"></span><b id="vHalo"></b><input type="range" id="sHalo" min="0" max="40" step="1" value="0"></div>
       <div class="sl"><span data-t="canopeeT"></span><b id="vCan"></b><input type="range" id="sCan" min="0" max="100" step="1" value="0"></div>
       <label class="ck"><input type="checkbox" id="ckUWPart" checked><span data-t="uwPart"></span></label>
       <label class="ck"><input type="checkbox" id="ckFlowLink" checked><span data-t="flowLink"></span></label>
@@ -216,6 +241,106 @@ button.pop.on::after{content:" \25C2"}
 <script>
 (function(){
 "use strict";
+/* =====================================================================
+   SOMMAIRE DU SCRIPT (v11, 27 oct. 2026). Chercher "BLOC <nom>" pour atteindre un bloc.
+   Sections : 1 CONFIGURATION  2 LANGUE  3 DONNEES DES FICHES  4 HYDRO  5 UTILITAIRES 3D
+              6 MOTEUR DE RENDU  7 REGISTRE DES MODULES  8 EFFETS ET QUALITE
+              9 LIEUX, VUES, NAVIGATION  10 INTERFACE  11 BOUCLE D'ANIMATION  12 DEMARRAGE
+   Contenu de la section 7 (ordre du fichier ; un module dependant d'un autre vient APRES lui) :
+   - Eau : vitesses par troncon et ajustements de rendu :
+       BLOC EAU2
+       BLOC AJUST7
+   - Decor 3D : fond, frayeres, galets, bois mort, arbres, herbes, eau :
+       BLOC GRANULO
+       BLOC FRAYERES
+       BLOC GALETS
+       BLOC BOISMORT
+       BLOC BRANCHES1
+       BLOC ARBRES
+       BLOC HERBES
+       BLOC EAU
+       BLOC EAU2
+   - Navigation, tactile et halo de transparence :
+       BLOC NAV
+       BLOC NAVTACTILE1
+       BLOC HALO
+   - Affluents et pressions anthropiques (decor 3D) :
+       BLOC AFFLUENTS
+       BLOC PRESSION
+   - Especes et moteur de population (donnees, milieu, fario, survie, peche, deversement, communaute) :
+       BLOC ESPECES
+       BLOC CYP2
+       BLOC MILIEU
+       BLOC FARIO
+       BLOC BORDS1
+       BLOC EMIG1
+       BLOC IMMI1
+       BLOC SURVIE1
+       BLOC PRESS1
+       BLOC PECHE
+       BLOC COLM1
+       BLOC ABRI2
+       BLOC CYP1
+       BLOC COMMUNAUTE
+   - Panneau Populations et carte d'habitat :
+       BLOC POPULATIONS
+       BLOC CARTE HABITAT
+   - Habitat : bois mort, abris, blocs, herbiers, ripisylve, contexte thermique, presets :
+       BLOC BOISMORT2
+       BLOC ABRIS1
+       BLOC TAILLES1
+       BLOC COLLE1
+       BLOC OBJ1
+       BLOC OBJ3
+       BLOC ROCHERS1
+       BLOC HERBIERS1
+       BLOC SURVIE1
+       BLOC HABITAT1
+       BLOC LIEUX1
+       BLOC RIPISYLVE1
+       BLOC RECHAUFFEMENT1
+       BLOC SAINE1
+       BLOC CONTEXTE1
+       BLOC INFOPRESS1
+   - Panneau Populations : sante du modele, pressions, amont / aval :
+       BLOC SANTE
+       BLOC PRESS2
+       BLOC PRESS3
+       BLOC PRESS4
+       BLOC PRESS5
+   - Menus : titres et assemblage de la barre de gauche :
+       BLOC TITRES1
+       BLOC TITRES2
+       BLOC RANGEMENT1
+       BLOC ORDRE1
+       BLOC AJUST1
+       BLOC AJUST2
+       BLOC ABRI3
+   - Poissons 3D (module FISH3D, identique a Fish3D.html) :
+       BLOC FISH3D
+       BLOC FARIO
+       BLOC FARIO2
+       BLOC ARC
+       BLOC JEUNES
+       BLOC CHABOT
+       BLOC FINESSE
+       BLOC ECREVISSE
+       BLOC NAGE
+       BLOC COURANT
+       BLOC FOULE
+       BLOC FISH1
+       BLOC FISH4
+       BLOC FISH6
+       BLOC FISH5
+   - Poissons = individus de la population simulee :
+       BLOC POPFISH1
+       BLOC POPFISH2
+       BLOC POPFISH3
+   - Console et curseurs de taille :
+       BLOC DEBUG1
+       BLOC TAILLES1
+   Les fiches d'information (DATA) et leurs references (REFS) sont a la section 3.
+   ===================================================================== */
 const $=id=>document.getElementById(id);
 if(!window.THREE||!THREE.OrbitControls){
   $("loading").textContent="Three.js n'a pas pu être chargé : vérifiez la connexion internet puis rechargez la page.";
@@ -305,7 +430,6 @@ const I18N={
              en:"Wheel: zoom · Drag: rotate · Right-click: move · Arrows: move · W / S: up / down · Double-click: go there · Esc: overview"},
   chargement:{fr:"Construction du tronçon…",en:"Building the reach…"},
   mecanisme:{fr:"Comment ça marche :",en:"How it works:"},
-  nonVerif:{fr:"Version de travail : contenu non encore vérifié par des sources.",en:"Work in progress: content not yet checked against sources."},
   amont:{fr:"Amont",en:"Upstream"},
   aval:{fr:"Aval",en:"Downstream"},
   ombres:{fr:"Ombres",en:"Shadows"},
@@ -396,11 +520,11 @@ const I18N={
   ctxChaud:{fr:"Plaine, chaude (+2,3 °C)",en:"Lowland, warm (+2.3 °C)"},
   popDTnote:{fr:"Hausse due au climat seul, progressive sur 50 ans. Elle s'ajoute à l'effet local de l'ombre et au contexte thermique.",en:"Rise due to climate alone, gradual over 50 years. It adds to the local shading effect and the thermal setting."},
   habInfoB:{fr:"ⓘ Habitat : facteurs, interactions et effets",en:"ⓘ Habitat: factors, interactions and effects"},
-  habInfo:{fr:"• Refuges (rochers, bois mort, herbiers, berges creusées, mouilles) : plus il y en a, mieux survivent les 0+ (en hiver), les 1+ et les adultes. Même à ×3, les blocs ne couvrent qu'environ 18 % de la surface mouillée (mesure du modèle) : le lit n'est pas saturé.\n• Ripisylve : son ombre refroidit l'eau d'été (jusqu'à 2,4 °C entre aucune ombre et ombre totale) mais supprime les renoncules sous ombrage dense.\n• Contexte thermique : température de base de la rivière (montagne froide, piémont, plaine chaude).\n• Réchauffement climatique (panneau Populations) : s'ajoute à l'ombre et au contexte.\n• Abris partagés (case ci-dessous, cochée par défaut) : le chabot et les juvéniles de truite fario (0+ et 1+) se disputent les mêmes abris ; moins il y en a, plus chaque espèce perd de survie selon la densité de l'autre. Coefficient 0,2 [M] (Roussel 1994, cité, qualitatif ; Sources AF4). Poser du bois ou des blocs réduit cette compétition.\nLa chaleur d'été (contexte + ombre + climat) agit à part : stress dès 19,5 °C de pic, létal à 25 °C. Les refuges ne l'annulent pas. L'ombre ne pèse donc que si la rivière approche 19,5 °C : plaine chaude ou réchauffement.\nValeurs : ordres de grandeur du modèle, voir Sources_Riviere (section AE).",
-   en:"• Shelter (rocks, deadwood, aquatic beds, undercut banks, pools): the more there is, the better 0+ (in winter), 1+ and adults survive. Even at ×3, boulders cover only about 18% of the wetted area (model measurement): the bed is not choked.\n• Riparian trees: their shade cools summer water (up to 2.4 °C between no shade and full shade) but removes water-crowfoot under dense shade.\n• Thermal setting: the river's base temperature (cold mountain, foothills, warm lowland).\n• Climate warming (Populations panel): adds to shade and setting.\n• Shared shelters (box below, ticked by default): bullhead and juvenile brown trout (0+ and 1+) compete for the same shelter; the scarcer it is, the more each species loses survival with the other's density. Coefficient 0.2 [M] (Roussel 1994, cited, qualitative; Sources AF4). Adding wood or boulders reduces this competition.\nSummer heat (setting + shade + climate) acts separately: stress from a 19.5 °C peak, lethal at 25 °C. Shelter does not cancel it. So shade only matters when the river gets close to 19.5 °C: warm lowland or warming.\nValues: model orders of magnitude, see Sources_Riviere (section AE)."},
+  habInfo:{fr:"• Refuges (rochers, bois mort, herbiers, berges creusées, mouilles) : plus il y en a, mieux survivent les 0+ (en hiver), les 1+ et les adultes. Même à ×3, les blocs ne couvrent qu'environ 18 % de la surface mouillée (mesure du modèle) : le lit n'est pas saturé.\n• Ripisylve : son ombre refroidit l'eau d'été (jusqu'à 2,4 °C entre aucune ombre et ombre totale) mais supprime les renoncules sous ombrage dense.\n• Contexte thermique : température de base de la rivière (montagne froide, piémont, plaine chaude).\n• Réchauffement climatique (panneau Populations) : s'ajoute à l'ombre et au contexte.\n• Abris partagés (case ci-dessous, cochée par défaut) : le chabot et les juvéniles de truite fario (0+ et 1+) se disputent les mêmes abris ; moins il y en a, plus chaque espèce perd de survie selon la densité de l'autre. Coefficient 0,2 (choix du modèle) (chevauchement marqué du microhabitat de repos truite-chabot, cité par la réf. {r:BM02}). Poser du bois ou des blocs réduit cette compétition.\nLa chaleur d'été (contexte + ombre + climat) agit à part : stress dès 19,5 °C de pic, létal à 25 °C. Les refuges ne l'annulent pas. L'ombre ne pèse donc que si la rivière approche 19,5 °C : plaine chaude ou réchauffement.\nValeurs : ordres de grandeur du modèle, références dans le menu « Références ».",
+   en:"• Shelter (rocks, deadwood, aquatic beds, undercut banks, pools): the more there is, the better 0+ (in winter), 1+ and adults survive. Even at ×3, boulders cover only about 18% of the wetted area (model measurement): the bed is not choked.\n• Riparian trees: their shade cools summer water (up to 2.4 °C between no shade and full shade) but removes water-crowfoot under dense shade.\n• Thermal setting: the river's base temperature (cold mountain, foothills, warm lowland).\n• Climate warming (Populations panel): adds to shade and setting.\n• Shared shelters (box below, ticked by default): bullhead and juvenile brown trout (0+ and 1+) compete for the same shelter; the scarcer it is, the more each species loses survival with the other's density. Coefficient 0.2 (model choice) (marked overlap of trout-bullhead resting microhabitat, cited in ref. {r:BM02}). Adding wood or boulders reduces this competition.\nSummer heat (setting + shade + climate) acts separately: stress from a 19.5 °C peak, lethal at 25 °C. Shelter does not cancel it. So shade only matters when the river gets close to 19.5 °C: warm lowland or warming.\nValues: model orders of magnitude, references in the 'References' menu."},
   pressInfoB:{fr:"ⓘ Fonctionnement des pressions anthropiques",en:"ⓘ How human pressures work"},
-  pressInfo:{fr:"• Une seule pression anthropique à la fois : hameau (ammoniac, surtout œufs et alevins), vaches (fines qui colmatent les graviers, surtout œufs) ou usine (chaleur et / ou métal, au choix).\n• Intensité : 100 % = niveau sévère à la confluence de l'affluent ; l'effet s'atténue vers l'aval (300 m à 1000 m selon la pression).\n• Lecture : courbes en amont et en aval de l'affluent, par classe de taille, comparées aux réglages d'Habitat du moment.\n• Interactions : la chaleur de l'usine s'ajoute à l'ombre, au contexte thermique et au réchauffement climatique, donc elle est plus nocive sur une eau déjà chaude. Les refuges de l'habitat ne neutralisent ni l'ammoniac, ni les fines, ni les métaux.\n• Pêche et déversement : réglages indépendants, plus bas dans ce menu ; ils s'ajoutent à la pression anthropique choisie.\n• Statut des valeurs : [V] lue, [O] indirecte, [M] ordre de grandeur du modèle (Sources_Riviere, section AD).",
-   en:"• One human pressure at a time: hamlet (ammonia, mostly eggs and fry), cows (fines that clog gravels, mostly eggs) or factory (heat and / or metal, your choice).\n• Intensity: 100% = severe level at the tributary confluence; the effect fades downstream (300 m to 1000 m depending on the pressure).\n• Reading: curves upstream and downstream of the tributary, per size class, compared with the current Habitat settings.\n• Interactions: factory heat adds to shade, thermal setting and climate warming, so it is more harmful on already warm water. Habitat shelter does not neutralise ammonia, fines or metals.\n• Angling and stocking: independent settings, further down in this menu; they add to the selected human pressure.\n• Status of values: [V] read, [O] indirect, [M] model order of magnitude (Sources_Riviere, section AD)."},
+  pressInfo:{fr:"• Une seule pression anthropique à la fois : hameau (ammoniac, surtout œufs et alevins), vaches (fines qui colmatent les graviers, surtout œufs) ou usine (chaleur et / ou métal, au choix).\n• Intensité : 100 % = niveau sévère à la confluence de l'affluent ; l'effet s'atténue vers l'aval (300 m à 1000 m selon la pression).\n• Lecture : courbes en amont et en aval de l'affluent, par classe de taille, comparées aux réglages d'Habitat du moment.\n• Interactions : la chaleur de l'usine s'ajoute à l'ombre, au contexte thermique et au réchauffement climatique, donc elle est plus nocive sur une eau déjà chaude. Les refuges de l'habitat ne neutralisent ni l'ammoniac, ni les fines, ni les métaux.\n• Pêche et déversement : réglages indépendants, plus bas dans ce menu ; ils s'ajoutent à la pression anthropique choisie.\n• Valeurs : celles qui sont citées viennent des références (menu « Références ») ; « choix du modèle » = paramètre sans mesure de terrain.",
+   en:"• One human pressure at a time: hamlet (ammonia, mostly eggs and fry), cows (fines that clog gravels, mostly eggs) or factory (heat and / or metal, your choice).\n• Intensity: 100% = severe level at the tributary confluence; the effect fades downstream (300 m to 1000 m depending on the pressure).\n• Reading: curves upstream and downstream of the tributary, per size class, compared with the current Habitat settings.\n• Interactions: factory heat adds to shade, thermal setting and climate warming, so it is more harmful on already warm water. Habitat shelter does not neutralise ammonia, fines or metals.\n• Angling and stocking: independent settings, further down in this menu; they add to the selected human pressure.\n• Values: those cited come from the references ('References' menu); 'model choice' = parameter without field measurement."},
   pressMenu:{fr:"Pressions anthropiques",en:"Human pressures"},
   pressInt:{fr:"Intensité (100 % = niveau sévère à la confluence)",en:"Intensity (100% = severe level at the confluence)"},
   pressHeat:{fr:"Chaleur (rejet d'eau chaude)",en:"Heat (warm water discharge)"},
@@ -410,19 +534,19 @@ const I18N={
   pressMetCd:{fr:"Cadmium",en:"Cadmium"},
   pressHard:{fr:"Dureté de l'eau (mg CaCO3/L)",en:"Water hardness (mg CaCO3/L)"},
   pressNoPos:{fr:"Aucune pression anthropique n'a pu être placée sur cette rivière : essaie « nouvelle rivière ».",en:"No human pressure could be placed on this river: try “new river”."},
-  bulH:{fr:"Hameau, eaux usées : l'ammoniac (NH3) tue d'abord les œufs et les alevins ; juvéniles et adultes ne sont touchés qu'à des doses bien plus fortes. Intensité 100 % = 0,025 mg/L à la confluence (standard provisoire européen) [O : truite arc-en-ciel]. L'effet s'atténue vers l'aval (500 m [M]). L'oxygène n'est pas modélisé.",
-        en:"Hamlet, wastewater: ammonia (NH3) kills eggs and fry first; juveniles and adults are only hit at much higher doses. Intensity 100% = 0.025 mg/L at the confluence (provisional European standard) [O: rainbow trout]. The effect fades downstream (500 m [M]). Oxygen is not modelled."},
-  bulV:{fr:"Vaches, sédiments fins : le bétail apporte des fines minérales et organiques qui colmatent les graviers et étouffent les œufs. Intensité 100 % = 20 % de fines à la confluence ; l'émergence tombe à 50 % vers 13 % de fines [O : salmonidés, Jensen 2009, Kondolf 2000]. Les adultes de fario ne sont touchés qu'ensuite, faute d'œufs. Chabot et vairon : œufs étouffés (jusqu'à 90 % et 50 %) et, pour le chabot, moins d'adultes (capacité jusqu'à -90 %) [M, Sources AF]. Persistance 300 m [M]. Le piétinement des berges n'est pas modélisé.",
-        en:"Cows, fine sediment: livestock bring mineral and organic fines that clog gravels and smother eggs. Intensity 100% = 20% fines at the confluence; emergence falls to 50% around 13% fines [O: salmonids, Jensen 2009, Kondolf 2000]. Brown trout adults are only affected later, through fewer eggs. Bullhead and minnow: smothered eggs (up to 90% and 50%) and, for bullhead, fewer adults (capacity down to 90%) [M, Sources AF]. Persistence 300 m [M]. Bank trampling is not modelled."},
-  bulU:{fr:"Usine : chaleur et / ou métal, au choix ; les deux effets s'ajoutent, supposés indépendants [M].",en:"Factory: heat and / or one metal, your choice; the two effects add up, assumed independent [M]."},
+  bulH:{fr:"Hameau, eaux usées : l'ammoniac (NH3) tue d'abord les œufs et les alevins ; juvéniles et adultes ne sont touchés qu'à des doses bien plus fortes. Intensité 100 % = 0,025 mg/L à la confluence (standard provisoire européen) (truite arc-en-ciel). L'effet s'atténue vers l'aval (500 m (choix du modèle)). L'oxygène n'est pas modélisé.",
+        en:"Hamlet, wastewater: ammonia (NH3) kills eggs and fry first; juveniles and adults are only hit at much higher doses. Intensity 100% = 0.025 mg/L at the confluence (provisional European standard) (rainbow trout). The effect fades downstream (500 m (model choice)). Oxygen is not modelled."},
+  bulV:{fr:"Vaches, sédiments fins : le bétail apporte des fines minérales et organiques qui colmatent les graviers et étouffent les œufs. Intensité 100 % = 20 % de fines à la confluence ; l'émergence tombe à 50 % vers 13 % de fines (salmonidés, Jensen 2009, Kondolf 2000). Les adultes de fario ne sont touchés qu'ensuite, faute d'œufs. Chabot et vairon : œufs étouffés (jusqu'à 90 % et 50 %) et, pour le chabot, moins d'adultes (capacité jusqu'à -90 %) (choix du modèle). Persistance 300 m (choix du modèle). Le piétinement des berges n'est pas modélisé.",
+        en:"Cows, fine sediment: livestock bring mineral and organic fines that clog gravels and smother eggs. Intensity 100% = 20% fines at the confluence; emergence falls to 50% around 13% fines (salmonids, Jensen 2009, Kondolf 2000). Brown trout adults are only affected later, through fewer eggs. Bullhead and minnow: smothered eggs (up to 90% and 50%) and, for bullhead, fewer adults (capacity down to 90%) (model choice). Persistence 300 m (model choice). Bank trampling is not modelled."},
+  bulU:{fr:"Usine : chaleur et / ou métal, au choix ; les deux effets s'ajoutent, supposés indépendants (choix du modèle).",en:"Factory: heat and / or one metal, your choice; the two effects add up, assumed independent (model choice)."},
   bulU0:{fr:"Coche la chaleur ou choisis un métal pour qu'il y ait un effet.",en:"Tick heat or pick a metal for anything to happen."},
-  bulUh:{fr:"Chaleur : +6 °C à 100 % (écart entre le pic d'été sans ombre, 18,9 °C [M], et la limite létale de 25 °C [V]) ; stress thermique au-dessus de 19,5 °C [V] ; touche surtout les 1+ et les adultes ; persistance 1000 m [M].",
-         en:"Heat: +6 °C at 100% (gap between the unshaded summer peak, 18.9 °C [M], and the 25 °C lethal limit [V]); thermal stress above 19.5 °C [V]; hits mostly 1+ and adults; persistence 1000 m [M]."},
-  bulUz:{fr:"Zinc : 100 % = 620 µg/L à la confluence, la CL50 96 h [V : Everall 1987, pH 7] ; touche 0+, 1+ et adultes [O]. Persistance 300 m [M].",en:"Zinc: 100% = 620 µg/L at the confluence, the 96 h LC50 [V: Everall 1987, pH 7]; hits 0+, 1+ and adults [O]. Persistence 300 m [M]."},
-  bulUc:{fr:"Cadmium : très toxique pour les alevins (CL50 96 h de 1,2 µg/L à dureté 29 à 10 µg/L à dureté 151 [V : Brinkman et Hansen]) ; embryons peu touchés [V] ; seuls les 0+ sont touchés dans le modèle (juvéniles et adultes non documentés). 100 % = la CL50 de la dureté choisie. Persistance 300 m [M].",
-         en:"Cadmium: very toxic to fry (96 h LC50 from 1.2 µg/L at hardness 29 to 10 µg/L at hardness 151 [V: Brinkman and Hansen]); embryos little affected [V]; only 0+ are hit in the model (juveniles and adults undocumented). 100% = the LC50 of the chosen hardness. Persistence 300 m [M]."},
+  bulUh:{fr:"Chaleur : +6 °C à 100 % (écart entre le pic d'été sans ombre, 18,9 °C (choix du modèle), et la limite létale de 25 °C ()) ; stress thermique au-dessus de 19,5 °C () ; touche surtout les 1+ et les adultes ; persistance 1000 m (choix du modèle).",
+         en:"Heat: +6 °C at 100% (gap between the unshaded summer peak, 18.9 °C (model choice), and the 25 °C lethal limit ()); thermal stress above 19.5 °C (); hits mostly 1+ and adults; persistence 1000 m (model choice)."},
+  bulUz:{fr:"Zinc : 100 % = 620 µg/L à la confluence, la CL50 96 h (Everall 1987, pH 7) ; touche 0+, 1+ et adultes (). Persistance 300 m (choix du modèle).",en:"Zinc: 100% = 620 µg/L at the confluence, the 96 h LC50 (Everall 1987, pH 7); hits 0+, 1+ and adults (). Persistence 300 m (model choice)."},
+  bulUc:{fr:"Cadmium : très toxique pour les alevins (CL50 96 h de 1,2 µg/L à dureté 29 à 10 µg/L à dureté 151 (Brinkman et Hansen)) ; embryons peu touchés () ; seuls les 0+ sont touchés dans le modèle (juvéniles et adultes non documentés). 100 % = la CL50 de la dureté choisie. Persistance 300 m (choix du modèle).",
+         en:"Cadmium: very toxic to fry (96 h LC50 from 1.2 µg/L at hardness 29 to 10 µg/L at hardness 151 (Brinkman and Hansen)); embryos little affected (); only 0+ are hit in the model (juveniles and adults undocumented). 100% = the LC50 of the chosen hardness. Persistence 300 m (model choice)."},
   bulComp:{fr:"La pression anthropique démarre à l'année {n} (barre verticale sur les courbes) ; les années précédentes servent de référence. Les courbes de « Dynamique des populations » tiennent compte de cette pression anthropique et des réglages d'habitat du moment.",en:"The human pressure starts in year {n} (vertical bar on the curves); earlier years are the reference. The curves in “Population dynamics” include this human pressure and the current habitat settings."},
-  bulLeg:{fr:"[V] lu sur la truite fario · [O] ordre de grandeur (autre salmonidé) · [M] choix du modèle. Résultats du modèle, pas des prévisions.",en:"[V] read on brown trout · [O] order of magnitude (other salmonid) · [M] model choice. Model results, not forecasts."},
+  bulLeg:{fr:"() lu sur la truite fario · () ordre de grandeur (autre salmonidé) · (choix du modèle) choix du modèle. Résultats du modèle, pas des prévisions.",en:"() read on brown trout · () order of magnitude (other salmonid) · (model choice) model choice. Model results, not forecasts."},
   avT:{fr:"Courbes de densité en amont et en aval de l'affluent anthropisé",en:"Density curves upstream and downstream of the human-impacted tributary"},
   avSub:{fr:"Individus par 100 m de rivière, années 1 à 50. La pression anthropique démarre à l'année {n} (barre verticale en pointillés) ; avant, les courbes servent de référence. La courbe orange claire en pointillés montre ce que deviendrait l'aval sans pression anthropique.",en:"Individuals per 100 m of river, years 1 to 50. The human pressure starts in year {n} (dashed vertical bar); before that, the curves are the reference. The dashed light-orange curve shows what the downstream part would be without human pressure."},
   avAm:{fr:"Amont",en:"Upstream"},
@@ -438,8 +562,8 @@ const I18N={
   tipYear:{fr:"Année",en:"Year"},
   tipUnit:{fr:"ind. / 100 m",en:"ind. / 100 m"},
   pressLoc:{fr:"Ponte locale + migratrice",en:"Local + migratory spawning"},
-  bulLoc:{fr:"Ponte locale + migratrice : {l} % des œufs sont pondus à ±{r} m des adultes (domaine vital inférieur à 270 m [V : Burrell 2000] ; 60 m pour les 1+ et plus [V : Jackson 1980]), {m} % par des géniteurs migrateurs sur tout le tronçon (8 poissons sur 18 [O : une seule rivière]). L'amont reste presque un témoin, mais baisse un peu.",
-          en:"Local + migratory spawning: {l}% of eggs are laid within ±{r} m of the adults (home range under 270 m [V: Burrell 2000]; 60 m for 1+ and older [V: Jackson 1980]), {m}% by migratory spawners over the whole reach (8 fish out of 18 [O: a single river]). Upstream stays nearly a control, but drops a little."},
+  bulLoc:{fr:"Ponte locale + migratrice : {l} % des œufs sont pondus à ±{r} m des adultes (domaine vital inférieur à 270 m (Burrell 2000) ; 60 m pour les 1+ et plus (Jackson 1980)), {m} % par des géniteurs migrateurs sur tout le tronçon (8 poissons sur 18 (une seule rivière)). L'amont reste presque un témoin, mais baisse un peu.",
+          en:"Local + migratory spawning: {l}% of eggs are laid within ±{r} m of the adults (home range under 270 m (Burrell 2000); 60 m for 1+ and older (Jackson 1980)), {m}% by migratory spawners over the whole reach (8 fish out of 18 (a single river)). Upstream stays nearly a control, but drops a little."},
   avNoteL:{fr:"Moyennes des {m} dernières années. L'amont peut baisser un peu : une part des géniteurs migre pour pondre et les adultes se dispersent. La vraie référence est « aval, sans pression anthropique ».",en:"Means of the last {m} years. Upstream may drop a little: a share of spawners migrate to spawn and adults disperse. The real reference is “downstream, no human pressure”."},
   bulGlob:{fr:"Ponte globale (case décochée) : tous les œufs forment un stock commun réparti sur tout le tronçon selon les frayères ; quand l'aval perd ses adultes, l'amont reçoit aussi moins d'œufs et baisse presque autant que l'aval.",en:"Global spawning (box unticked): all eggs form one common stock spread over the whole reach according to the spawning grounds; when the downstream part loses its adults, the upstream part also receives fewer eggs and drops almost as much."},
   pressLocTip:{fr:"Où sont pondus les œufs : près des adultes qui les produisent (local + migrateurs) ou en un stock commun sur tout le tronçon. Explication dans l'encadré en bas du menu.",en:"Where eggs are laid: near the adults that produce them (local + migratory) or in one common stock over the whole reach. Explained in the box at the bottom of the menu."},
@@ -455,8 +579,8 @@ const I18N={
   avHA:{fr:"Aval avec",en:"Down. with"},
   avHE:{fr:"Écart",en:"Gap"},
   tabSubP:{fr:"La pression anthropique choisie est comprise (amont et aval confondus).",en:"The selected human pressure is included (upstream and downstream together)."},
-  flowInfo:{fr:"Chaque année simulée tire au hasard un régime de débits par saison et d'éventuelles crues. Les simulations font des tirages différents : c'est la bande autour du trait.\n• Crues fortes (probabilité par an) : printemps 15 %, automne 20 %, hiver 25 %. Hiver : 15 à 60 % des œufs détruits selon la force de la crue (ordre de grandeur d'après Sources I2). Printemps : jusqu'à 35 % des 0+ emportés. Automne : aucun effet direct dans le modèle.\n• Débits (médiane, relative à l'étiage) : printemps 2,2 ; été 1,0 ; automne 1,6 ; hiver 3,0, avec une variation d'une année à l'autre dont 60 % est commune aux 4 saisons (année sèche ou humide). Le débit change la surface d'habitat utile de chaque stade (profondeur, vitesse) et, en été, la température : un débit faible réchauffe l'eau (jusqu'à +1,3 °C).\nValeurs : ordres de grandeur du modèle [M].",
-   en:"Each simulated year randomly draws seasonal flows and possible floods. The simulations use different draws: that is the band around the line.\n• Strong floods (probability per year): spring 15%, autumn 20%, winter 25%. Winter: 15 to 60% of eggs destroyed depending on flood strength (order of magnitude from Sources I2). Spring: up to 35% of 0+ washed out. Autumn: no direct effect in the model.\n• Flows (median, relative to low flow): spring 2.2; summer 1.0; autumn 1.6; winter 3.0, with year-to-year variation of which 60% is shared by all 4 seasons (dry or wet year). Flow changes the useful habitat area of each stage (depth, velocity) and, in summer, temperature: low flow warms the water (up to +1.3 °C).\nValues: model orders of magnitude [M]."},
+  flowInfo:{fr:"Chaque année simulée tire au hasard un régime de débits par saison et d'éventuelles crues. Les simulations font des tirages différents : c'est la bande autour du trait.\n• Crues fortes (probabilité par an) : printemps 15 %, automne 20 %, hiver 25 %. Hiver : 15 à 60 % des œufs détruits selon la force de la crue (ordre de grandeur d'après la Chevenne, réf. {r:CHEV} : 15-17 % à 50-67 % de frayères détruites selon le site). Printemps : jusqu'à 35 % des 0+ emportés. Automne : aucun effet direct dans le modèle.\n• Débits (médiane, relative à l'étiage) : printemps 2,2 ; été 1,0 ; automne 1,6 ; hiver 3,0, avec une variation d'une année à l'autre dont 60 % est commune aux 4 saisons (année sèche ou humide). Le débit change la surface d'habitat utile de chaque stade (profondeur, vitesse) et, en été, la température : un débit faible réchauffe l'eau (jusqu'à +1,3 °C).\nValeurs : ordres de grandeur du modèle (choix du modèle).",
+   en:"Each simulated year randomly draws seasonal flows and possible floods. The simulations use different draws: that is the band around the line.\n• Strong floods (probability per year): spring 15%, autumn 20%, winter 25%. Winter: 15 to 60% of eggs destroyed depending on flood strength (order of magnitude from the Chevenne, ref. {r:CHEV}: 15-17% to 50-67% of redds destroyed depending on site). Spring: up to 35% of 0+ washed out. Autumn: no direct effect in the model.\n• Flows (median, relative to low flow): spring 2.2; summer 1.0; autumn 1.6; winter 3.0, with year-to-year variation of which 60% is shared by all 4 seasons (dry or wet year). Flow changes the useful habitat area of each stage (depth, velocity) and, in summer, temperature: low flow warms the water (up to +1.3 °C).\nValues: model orders of magnitude (model choice)."},
   popSame:{fr:"Même nombre de pêcheurs avec et sans lâcher (choix de l'auteur).",en:"Same number of anglers with and without stocking (author's choice)."},
   pechT:{fr:"Pêche et déversement",en:"Angling and stocking"},
   netLab:{fr:"Rivière ouverte sur le réseau",en:"River open to the network"},
@@ -465,27 +589,31 @@ const I18N={
   iLireT:{fr:"• Chaque simulation dure 50 ans. Les 10 simulations (« graines ») sont 10 histoires différentes de crues et de débits, tirées au hasard sur la même rivière ; avec et sans lâcher, ce sont les mêmes tirages.\n• Courbes : trait = moyenne des simulations, bande = de la plus basse à la plus haute. Individus par 100 m de rivière.\n• Les 4 courbes comptent toute la rivière étudiée (environ 600 m, tous les tronçons ensemble).\n• Tableau : moyenne des 20 dernières années. Extinction : simulation où il reste moins d'une truite fario adulte à l'année 50.\n• Avec une pression anthropique, la section « Courbes de densité en amont et en aval de l'affluent anthropisé » compare l'aval avec et sans cette pression.",
    en:"• Each simulation lasts 50 years. The 10 simulations (“seeds”) are 10 different histories of floods and flows, drawn at random on the same river; with and without stocking, the draws are identical.\n• Curves: line = mean of simulations, band = lowest to highest. Individuals per 100 m of river.\n• The 4 curves count the whole studied river (about 600 m, all reaches together).\n• Table: mean of the last 20 years. Extinction: simulation with fewer than one adult brown trout left at year 50.\n• With a human pressure, the “Density curves upstream and downstream of the human-impacted tributary” section compares the downstream part with and without that pressure."},
   iTemp:{fr:"ⓘ Température de l'eau : ombre, contexte, climat",en:"ⓘ Water temperature: shade, setting, climate"},
-  iTempT:{fr:"Température d'été d'un tronçon = base + ombre + débit + contexte + réchauffement climatique.\n• Base (tronçon totalement ombragé, piémont) : printemps 8,5, été 14,5, automne 9,5, hiver 4,5 °C [M, calée sur les sondes de Haute-Savoie, Sources P10]. Pointe d'une semaine chaude : +2 °C.\n• Ombre : sans ombre, l'été gagne 1,5 °C en moyenne et 0,9 °C de plus à la pointe, soit +2,4 °C entre ombre totale et aucune ombre (la littérature donne 1,5 à 5 °C sur le maximum instantané, Sources AE1 à AE3).\n• Débit : un été sec réchauffe jusqu'à +1,3 °C, un été de forts débits refroidit jusqu'à 0,8 °C.\n• Contexte thermique : −2,0 (montagne froide), 0 (piémont), +2,3 °C (plaine chaude) [M, d'après P10].\n• Réchauffement climatique : 0 à +4 °C, progressif sur 50 ans, ajouté à tout le reste.\n• Seuils de la truite fario : stress dès 19,5 °C de pic d'été, mortalité croissante jusqu'à 25 °C, limite létale à 7 jours [V, Environment Agency, Sources L1]. La forme de la mortalité entre les deux est un choix du modèle [M].\nPiémont à +0 °C : même sans ombre, le pic reste à 18,9 °C, sous le seuil, donc l'ombre ne change pas la survie. Plaine chaude à +2 °C : survie d'été 0,86 sous ombre totale, 0,25 sans ombre.",
-   en:"Summer temperature of a reach = base + shade + flow + setting + climate warming.\n• Base (fully shaded reach, foothills): spring 8.5, summer 14.5, autumn 9.5, winter 4.5 °C [M, calibrated on the Haute-Savoie probes, Sources P10]. Hot-week peak: +2 °C.\n• Shade: with no shade, summer gains 1.5 °C on average and 0.9 °C more at the peak, i.e. +2.4 °C between full shade and none (literature gives 1.5 to 5 °C on the instantaneous maximum, Sources AE1 to AE3).\n• Flow: a dry summer warms up to +1.3 °C, a high-flow summer cools up to 0.8 °C.\n• Thermal setting: −2.0 (cold mountain), 0 (foothills), +2.3 °C (warm lowland) [M, from P10].\n• Climate warming: 0 to +4 °C, gradual over 50 years, added to everything else.\n• Brown trout thresholds: stress from a 19.5 °C summer peak, mortality rising up to 25 °C, 7-day lethal limit [V, Environment Agency, Sources L1]. The shape of mortality in between is a model choice [M].\nFoothills at +0 °C: even with no shade the peak stays at 18.9 °C, below the threshold, so shade does not change survival. Warm lowland at +2 °C: summer survival 0.86 under full shade, 0.25 with none."},
+  iTempT:{fr:"Température d'été d'un tronçon = base + ombre + débit + contexte + réchauffement climatique.\n• Base (tronçon totalement ombragé, piémont) : printemps 8,5, été 14,5, automne 9,5, hiver 4,5 °C (choix du modèle, calée sur des sondes de Haute-Savoie, réf. {r:VI08}). Pointe d'une semaine chaude : +2 °C.\n• Ombre : sans ombre, l'été gagne 1,5 °C en moyenne et 0,9 °C de plus à la pointe, soit +2,4 °C entre ombre totale et aucune ombre (la littérature donne 1,5 à 5 °C sur le maximum instantané, réf. {r:MO05}, {r:BR11}).\n• Débit : un été sec réchauffe jusqu'à +1,3 °C, un été de forts débits refroidit jusqu'à 0,8 °C.\n• Contexte thermique : −2,0 (montagne froide), 0 (piémont), +2,3 °C (plaine chaude) (choix du modèle, d'après des sondes de Haute-Savoie, réf. {r:VI08}).\n• Réchauffement climatique : 0 à +4 °C, progressif sur 50 ans, ajouté à tout le reste.\n• Seuils de la truite fario : stress dès 19,5 °C de pic d'été, mortalité croissante jusqu'à 25 °C, limite létale à 7 jours (réf. {r:EA}). La forme de la mortalité entre les deux est un choix du modèle (choix du modèle).\nPiémont à +0 °C : même sans ombre, le pic reste à 18,9 °C, sous le seuil, donc l'ombre ne change pas la survie. Plaine chaude à +2 °C : survie d'été 0,86 sous ombre totale, 0,25 sans ombre.",
+   en:"Summer temperature of a reach = base + shade + flow + setting + climate warming.\n• Base (fully shaded reach, foothills): spring 8.5, summer 14.5, autumn 9.5, winter 4.5 °C (model choice, calibrated on Haute-Savoie probes, ref. {r:VI08}). Hot-week peak: +2 °C.\n• Shade: with no shade, summer gains 1.5 °C on average and 0.9 °C more at the peak, i.e. +2.4 °C between full shade and none (literature gives 1.5 to 5 °C on the instantaneous maximum, ref. {r:MO05}, {r:BR11}).\n• Flow: a dry summer warms up to +1.3 °C, a high-flow summer cools up to 0.8 °C.\n• Thermal setting: −2.0 (cold mountain), 0 (foothills), +2.3 °C (warm lowland) (model choice, from Haute-Savoie probes, ref. {r:VI08}).\n• Climate warming: 0 to +4 °C, gradual over 50 years, added to everything else.\n• Brown trout thresholds: stress from a 19.5 °C summer peak, mortality rising up to 25 °C, 7-day lethal limit (ref. {r:EA}). The shape of mortality in between is a model choice (model choice).\nFoothills at +0 °C: even with no shade the peak stays at 18.9 °C, below the threshold, so shade does not change survival. Warm lowland at +2 °C: summer survival 0.86 under full shade, 0.25 with none."},
   iFlow:{fr:"ⓘ Crues et débits",en:"ⓘ Floods and flows"},
   iHab:{fr:"ⓘ Habitat : facteurs, interactions et effets",en:"ⓘ Habitat: factors, interactions and effects"},
   iSurv:{fr:"ⓘ Cycle de vie et survie de la truite fario",en:"ⓘ Brown trout life cycle and survival"},
-  iSurvT:{fr:"• Quatre stades : œuf, 0+ (de l'année), 1+, adulte (2 ans et plus), un pas par saison.\n• Ponte en hiver : environ 600 œufs par femelle de 0,3 kg (2000 œufs par kg [O], poids [M]) ; 85 % des adultes se reproduisent, 50 % de femelles [M].\n• Survie : œufs jusqu'à l'émergence 0,5 [O, plage 0,1 à 0,86] ; 0+ en été 0,25 [M] ; 1+ et adultes 0,40 par an [V, plage 0,30 à 0,50].\n• Avec « Survie liée à l'habitat » : la survie des 1+ et adultes varie de 0,30 à 0,50 et celle des 0+ en hiver de 0,15 à 0,35 selon l'indice de refuge (bois mort, blocs, herbiers, eau profonde). Sans refuge, on est au minimum de ces plages.\n• La capacité d'habitat limite les 0+ en été et les 1+ et adultes à l'automne (loi de Beverton-Holt).\n• La température d'été agit en plus sur la survie d'été (voir Température).",
-   en:"• Four stages: egg, 0+ (young of the year), 1+, adult (2 years and older), one step per season.\n• Winter spawning: about 600 eggs per 0.3 kg female (2000 eggs per kg [O], weight [M]); 85% of adults breed, 50% females [M].\n• Survival: eggs to emergence 0.5 [O, range 0.1 to 0.86]; 0+ in summer 0.25 [M]; 1+ and adults 0.40 per year [V, range 0.30 to 0.50].\n• With “Habitat-dependent survival”: survival of 1+ and adults varies from 0.30 to 0.50 and of 0+ in winter from 0.15 to 0.35 with the shelter index (deadwood, boulders, aquatic beds, deep water). With no shelter, values sit at the lower end of these ranges.\n• Habitat capacity limits 0+ in summer and 1+ and adults in autumn (Beverton-Holt law).\n• Summer temperature acts on summer survival as well (see Temperature)."},
+  iSurvT:{fr:"• Quatre stades : œuf, 0+ (de l'année), 1+, adulte (2 ans et plus), un pas par saison.\n• Ponte en hiver : environ 600 œufs par femelle de 0,3 kg (2000 œufs par kg (), poids (choix du modèle)) ; 85 % des adultes se reproduisent, 50 % de femelles (choix du modèle).\n• Survie : œufs jusqu'à l'émergence 0,5 (plage 0,1 à 0,86, réf. {r:BM02}) ; 0+ en été 0,25 (choix du modèle) ; 1+ et adultes 0,40 par an (plage 0,30 à 0,50 sur le Scorff, réf. {r:BM02}).\n• Avec « Survie liée à l'habitat » : la survie des 1+ et adultes varie de 0,30 à 0,50 et celle des 0+ en hiver de 0,15 à 0,35 selon l'indice de refuge (bois mort, blocs, herbiers, eau profonde). Sans refuge, on est au minimum de ces plages.\n• La capacité d'habitat limite les 0+ en été et les 1+ et adultes à l'automne (loi de Beverton-Holt).\n• La température d'été agit en plus sur la survie d'été (voir Température).",
+   en:"• Four stages: egg, 0+ (young of the year), 1+, adult (2 years and older), one step per season.\n• Winter spawning: about 600 eggs per 0.3 kg female (2000 eggs per kg (), weight (model choice)); 85% of adults breed, 50% females (model choice).\n• Survival: eggs to emergence 0.5 (range 0.1 to 0.86, ref. {r:BM02}); 0+ in summer 0.25 (model choice); 1+ and adults 0.40 per year (range 0.30 to 0.50 in the Scorff, ref. {r:BM02}).\n• With “Habitat-dependent survival”: survival of 1+ and adults varies from 0.30 to 0.50 and of 0+ in winter from 0.15 to 0.35 with the shelter index (deadwood, boulders, aquatic beds, deep water). With no shelter, values sit at the lower end of these ranges.\n• Habitat capacity limits 0+ in summer and 1+ and adults in autumn (Beverton-Holt law).\n• Summer temperature acts on summer survival as well (see Temperature)."},
   iNet:{fr:"ⓘ Rivière ouverte et échanges de 0+",en:"ⓘ Open river and 0+ exchange"},
-  iNetT:{fr:"La rivière étudiée n'est ni la première ni la dernière d'un réseau.\n• Le cours d'eau continue à l'identique au-delà des deux bords, avec une source amont à 50 % de la capacité [M].\n• Chaque année, 27,5 % des 0+ partent vers l'aval (valeur centrale de 20 à 35 %, Sources Q2).\n• Il en arrive d'amont 70 % du nombre de départs, donc la perte nette est de 30 % des départs [M, sans source].\n• La remontée d'adultes est désactivée : pas assez de données.",
-   en:"The studied river is neither the first nor the last of a network.\n• The river continues identically beyond both edges, with an upstream source at 50% of capacity [M].\n• Each year, 27.5% of 0+ leave downstream (central value of 20 to 35%, Sources Q2).\n• 70% of that number arrive from upstream, so net loss is 30% of departures [M, no source].\n• Adult upstream runs are switched off: not enough data."},
+  iNetT:{fr:"La rivière étudiée n'est ni la première ni la dernière d'un réseau.\n• Le cours d'eau continue à l'identique au-delà des deux bords, avec une source amont à 50 % de la capacité (choix du modèle).\n• Chaque année, 27,5 % des 0+ partent vers l'aval (valeur centrale de 20 à 35 %, réf. {r:BM02}).\n• Il en arrive d'amont 70 % du nombre de départs, donc la perte nette est de 30 % des départs (choix du modèle ; sans source).\n• La remontée d'adultes est désactivée : pas assez de données.",
+   en:"The studied river is neither the first nor the last of a network.\n• The river continues identically beyond both edges, with an upstream source at 50% of capacity (model choice).\n• Each year, 27.5% of 0+ leave downstream (central value of 20 to 35%, ref. {r:BM02}).\n• 70% of that number arrive from upstream, so net loss is 30% of departures (model choice; no source).\n• Adult upstream runs are switched off: not enough data."},
   iPech:{fr:"ⓘ Pêche et déversement",en:"ⓘ Angling and stocking"},
-  iPechT:{fr:"• Pêche : chaque année, 65 % des truites fario capturables sont prélevés avant la ponte [O, Brevenne, Rhône : 60 à 65 % des adultes conservés par an] ; capturables = 50 % des adultes [M, sans source]. Les 0+ et 1+ ne sont pas touchés.\n• Déversement : 30 portions par km et par an [O, Pays du Perche, Sources T1], arc-en-ciel stériles ; 90 % prises ou perdues dans la saison [O], 30 % des survivantes gardées [M]. Suivies à part des sauvages.\n• Hypothèse du modèle : même nombre de pêcheurs avec et sans lâcher ; une partie de la pêche se détourne sur les portions, et la concurrence sur les 0+ de truite fario est faible. Ce n'est pas un résultat démontré (Sources V, X, Y).",
-   en:"• Angling: each year, 65% of catchable brown trout are taken before spawning [O, Brevenne, Rhône: 60 to 65% of adults kept per year]; catchable = 50% of adults [M, no source]. 0+ and 1+ are not affected.\n• Stocking: 30 catchable fish per km per year [O, Pays du Perche, Sources T1], sterile rainbow trout; 90% taken or lost within the season [O], 30% of survivors kept [M]. Tracked separately from wild fish.\n• Model assumption: same number of anglers with and without stocking; part of the angling shifts to stocked fish, and competition on brown trout 0+ is weak. This is not a demonstrated result (Sources V, X, Y)."},
+  iPechT:{fr:"• Pêche : chaque année, 65 % des truites fario capturables sont prélevés avant la ponte (Brevenne, Rhône : 60 à 65 % des adultes conservés par an, propos d'une fédération rapportés par la presse spécialisée) ; capturables = 50 % des adultes (choix du modèle ; sans source). Les 0+ et 1+ ne sont pas touchés.\n• Déversement : 30 portions par km et par an (Pays du Perche, réf. {r:PERCHE}), arc-en-ciel stériles ; 90 % prises ou perdues dans la saison (), 30 % des survivantes gardées (choix du modèle). Suivies à part des sauvages.\n• Hypothèse du modèle : même nombre de pêcheurs avec et sans lâcher ; une partie de la pêche se détourne sur les portions, et la concurrence sur les 0+ de truite fario est faible. Ce n'est pas un résultat démontré : les études disponibles sont partagées.",
+   en:"• Angling: each year, 65% of catchable brown trout are taken before spawning (Brevenne, Rhône: 60 to 65% of adults kept per year, statement by a federation reported by the angling press); catchable = 50% of adults (model choice; no source). 0+ and 1+ are not affected.\n• Stocking: 30 catchable fish per km per year (Pays du Perche, ref. {r:PERCHE}), sterile rainbow trout; 90% taken or lost within the season (), 30% of survivors kept (model choice). Tracked separately from wild fish.\n• Model assumption: same number of anglers with and without stocking; part of the angling shifts to stocked fish, and competition on brown trout 0+ is weak. This is not a demonstrated result: available studies are divided."},
   iPress:{fr:"ⓘ Pressions anthropiques",en:"ⓘ Human pressures"},
   iEsp:{fr:"ⓘ Espèces associées : chabot, vairon, écrevisse",en:"ⓘ Associated species: bullhead, minnow, crayfish"},
-  iEspT:{fr:"Chabot, vairon et chevesne sont toujours simulés ; leurs adultes sont dans le tableau. Le chevesne n'apparaît qu'avec le réchauffement (eau de printemps au-dessus de 12 °C environ [V, Sources AG1]) et remonte la rivière si elle est ouverte. Deux réglages, dans « Espèces » (désactivés par défaut) :\n• Prédation de la truite fario sur chabot et vairon : réduit leur survie d'été avec la densité de truite fario (coefficients 0,05 et 0,10 [M], Sources L4, L5).\n• Écrevisse signal (introduite) : un front remonte la rivière ; il réduit la survie d'été des chabots (coefficient 0,6) et des 0+ de truite fario (0,2) [M, Sources L7].",
-   en:"Bullhead, minnow and chub are always simulated; their adults are in the table. Chub only appears with warming (spring water above about 12 °C [V, Sources AG1]) and moves up the river if it is open. Two settings, in “Species” (off by default):\n• Brown trout predation on bullhead and minnow: reduces their summer survival with brown trout density (coefficients 0.05 and 0.10 [M], Sources L4, L5).\n• Signal crayfish (introduced): a front moves up the river; it reduces summer survival of bullheads (coefficient 0.6) and brown trout 0+ (0.2) [M, Sources L7]."},
-  iSrc:{fr:"ⓘ Sources et statuts des valeurs",en:"ⓘ Sources and status of values"},
-  iSrcT:{fr:"Chaque valeur du modèle a un statut : [V] lue dans une source, [O] ordre de grandeur tiré d'une source indirecte (autre espèce ou autre rivière), [M] choix du modèle, sans source.\nLe détail est dans Sources_Riviere.txt : température et ombre (AE, M3), pressions (AD), habitat et survie (AB, AC), crues (I2), seuils thermiques (L1).\nLes résultats sont des ordres de grandeur du modèle, pas des prédictions.",
-   en:"Each model value has a status: [V] read in a source, [O] order of magnitude from an indirect source (other species or river), [M] model choice, no source.\nDetails are in Sources_Riviere.txt: temperature and shade (AE, M3), pressures (AD), habitat and survival (AB, AC), floods (I2), thermal thresholds (L1).\nResults are model orders of magnitude, not predictions."},
-  netNote:{fr:"Entrées et sorties amont et aval, échanges de 0+ : départs vers l'aval 27,5 %, arrivées d'amont 70 % des départs.",en:"Upstream and downstream in and out, 0+ exchange: downstream departures 27.5%, arrivals from upstream 70% of departures."}
+  iEspT:{fr:"Chabot, vairon et chevesne sont toujours simulés ; leurs adultes sont dans le tableau. Le chevesne n'apparaît qu'avec le réchauffement (eau de printemps au-dessus de 12 °C environ réf. {r:KE20}) et remonte la rivière si elle est ouverte. Deux réglages, dans « Espèces » (désactivés par défaut) :\n• Prédation de la truite fario sur chabot et vairon : réduit leur survie d'été avec la densité de truite fario (coefficients 0,05 et 0,10 (choix du modèle), réf. {r:N2000CHA}, {r:DORISVAI}).\n• Écrevisse signal (introduite) : un front remonte la rivière ; il réduit la survie d'été des chabots (coefficient 0,6) et des 0+ de truite fario (0,2) (choix du modèle ; réf. {r:FI13}).",
+   en:"Bullhead, minnow and chub are always simulated; their adults are in the table. Chub only appears with warming (spring water above about 12 °C ref. {r:KE20}) and moves up the river if it is open. Two settings, in “Species” (off by default):\n• Brown trout predation on bullhead and minnow: reduces their summer survival with brown trout density (coefficients 0.05 and 0.10 (model choice), ref. {r:N2000CHA}, {r:DORISVAI}).\n• Signal crayfish (introduced): a front moves up the river; it reduces summer survival of bullheads (coefficient 0.6) and brown trout 0+ (0.2) (model choice; ref. {r:FI13})."},
+  netNote:{fr:"Entrées et sorties amont et aval, échanges de 0+ : départs vers l'aval 27,5 %, arrivées d'amont 70 % des départs.",en:"Upstream and downstream in and out, 0+ exchange: downstream departures 27.5%, arrivals from upstream 70% of departures."},
+  /* ajouts regroupes (ex-Object.assign : EAU2, FISH1, POPFISH1, TAILLES1) */
+  uwPart:{fr:"Particules en suspension sous l'eau",en:"Suspended particles underwater"},
+  flowLink:{fr:"Courant visuel lié à la vitesse par tronçon (radier / mouille)",en:"Visual current tied to speed per reach (riffle / pool)"},
+  fishCk:{fr:"Poissons 3D (population simulée, curseur d'année)",en:"3D fish (simulated population, year slider)"},
+  yrLab:{fr:"Année simulée",en:"Simulated year"},yrSeed:{fr:"trajectoire simulée n° ",en:"simulated trajectory #"},yrOne:{fr:"Individus cette année : ",en:"Individuals this year: "},
+  yrDraw:{fr:"dessinés à moins de 60 m : ",en:"drawn within 60 m: "},yrOther:{fr:"positions illustratives",en:"illustrative positions"},yrPlay:{fr:"Lecture automatique des années",en:"Play years automatically"},yrTraj:{fr:"Trajectoire",en:"Trajectory"},yrTrajT:{fr:"Simulation n° (graine) : une histoire possible de la rivière",en:"Simulation # (seed): one possible history of the river"},yrFold:{fr:"Replier / déplier la barre d'année",en:"Fold / unfold the year bar"},
+  rkSize:{fr:"Taille des blocs",en:"Boulder size"},plSize:{fr:"Taille des roseaux et renoncules",en:"Reed and water-crowfoot size"}
 };
 const t=k=>(I18N[k]?(I18N[k][LANG]||I18N[k].fr):k);
 const L=o=>(o&&typeof o==="object"&&!Array.isArray(o))?(o[LANG]||o.fr):o;
@@ -493,75 +621,77 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",
 
 /* =====================================================================
    3. DONNEES DES FICHES (toute l'information scientifique est ICI)
-   Statut : NON VERIFIE (a sourcer dans Sources_Riviere.txt)
+   Les fiches citent leurs sources (RVREFS, ci-dessous)
    ===================================================================== */
 const DATA={
-  troncon:{c:"#9fd17a",n:{fr:"Le tronçon",en:"The reach"},
-    d:{fr:"Un tronçon de rivière à truites généré à partir de règles générales de géomorphologie : méandres irréguliers, radiers et mouilles, îlots, blocs, lit mineur et lit majeur.",
-       en:"A trout-stream reach generated from general geomorphology rules: irregular meanders, riffles and pools, islands, boulders, main channel and floodplain."},
-    m:{fr:"Les proportions sont des valeurs du modèle, plausibles mais non mesurées sur un site réel. Chaque « autre rivière » est un tirage différent des mêmes règles. Le courant va de l'étiquette « Amont » vers l'étiquette « Aval ».",
-       en:"Proportions are model values, plausible but not measured on a real site. Each 'other river' is a new draw from the same rules. Water flows from the 'Upstream' label to the 'Downstream' label."},
-    f:{fr:["Échelle : 1 unité = 1 mètre (modèle)","Hauteurs non exagérées","Rivière schématique, pas un site réel"],
-       en:["Scale: 1 unit = 1 metre (model)","Heights not exaggerated","Schematic river, not a real site"]}},
-  litMineur:{c:"#7fb6c9",n:{fr:"Lit mineur",en:"Main channel"},
-    d:{fr:"Chenal où l'eau s'écoule en dehors des crues, entre les deux berges.",en:"Channel where water flows outside floods, between the two banks."},
-    m:{fr:"Sa largeur et sa profondeur changent sans cesse : large et peu profond sur les radiers, plus étroit et creux dans les mouilles. Dans ce modèle, sa largeur varie d'environ 5 à 10 m (le plus large autour des îlots).",
-       en:"Its width and depth keep changing: wide and shallow on riffles, narrower and deeper in pools. In this model its width ranges from about 5 to 10 m (widest around islands)."},
-    f:{fr:["Limite : les berges","Formes : radiers, plats, mouilles","Largeur : variable"],en:["Limit: the banks","Forms: riffles, runs, pools","Width: variable"]}},
-  radier:{c:"#5fd0e3",n:{fr:"Radier",en:"Riffle"},
-    d:{fr:"Zone peu profonde où l'eau court vite sur des graviers et des galets. La surface est agitée et l'eau bien brassée.",
-       en:"Shallow area where water runs fast over gravel and cobbles. The surface is broken and the water well mixed."},
-    m:{fr:"La femelle truite fario creuse son nid de ponte (frayère) dans les graviers, souvent en tête de radier ou en queue de mouille, là où l'eau circule dans le gravier et oxygène les œufs. Les alevins et beaucoup d'invertébrés vivent aussi dans ces zones.",
-       en:"The female brown trout digs her nest (redd) in the gravel, often at the head of a riffle or the tail of a pool, where water flows through the gravel and oxygenates the eggs. Fry and many invertebrates also live here."},
-    f:{fr:["Profondeur : faible","Courant : rapide","Fond : graviers, galets","Rôle : reproduction, nurserie, nourriture"],
-       en:["Depth: shallow","Current: fast","Bed: gravel, cobbles","Role: spawning, nursery, food"]}},
-  mouille:{c:"#3f7fdc",n:{fr:"Mouille",en:"Pool"},
-    d:{fr:"Fosse plus profonde où le courant ralentit, creusée le plus souvent à l'extérieur d'une courbe. Le fond y est plus fin (sables, limons).",
-       en:"Deeper hollow where the current slows, usually scoured on the outside of a bend. The bed is finer (sand, silt)."},
-    m:{fr:"Les mouilles abritent les truites adultes : profondeur, courant faible pour économiser l'énergie, caches sous la berge et les racines. En été et en basses eaux, ce sont souvent les derniers refuges.",
-       en:"Pools shelter adult trout: depth, slow current to save energy, hiding places under banks and roots. In summer and at low flow they are often the last refuges."},
-    f:{fr:["Profondeur : forte (relative)","Courant : lent","Fond : sables, limons","Rôle : abri des adultes"],
-       en:["Depth: deep (relative)","Current: slow","Bed: sand, silt","Role: shelter for adults"]}},
-  meandre:{c:"#d97757",n:{fr:"Méandre",en:"Meander"},
-    d:{fr:"Courbe naturelle du cours d'eau. Le courant le plus fort est dévié vers l'extérieur de la courbe.",
-       en:"Natural bend of the river. The strongest current is pushed towards the outside of the bend."},
-    m:{fr:"L'eau érode la rive extérieure (concave) et dépose graviers et sables sur la rive intérieure (convexe). Les mouilles se forment surtout dans les courbes et les radiers entre deux courbes. Aucun méandre n'est identique : amplitude et longueur varient.",
-       en:"Water erodes the outer (concave) bank and drops gravel and sand on the inner (convex) bank. Pools form mostly in bends and riffles between bends. No two meanders are alike: amplitude and length vary."},
-    f:{fr:["Érosion : rive concave","Dépôt : rive convexe","Mouilles : surtout dans les courbes","Radiers : entre les courbes"],
-       en:["Erosion: concave bank","Deposition: convex bank","Pools: mostly in bends","Riffles: between bends"]}},
-  concave:{c:"#c9905a",n:{fr:"Rive concave",en:"Cut bank"},
-    d:{fr:"Berge abrupte à l'extérieur de la courbe, sapée par le courant.",en:"Steep bank on the outside of the bend, undercut by the current."},
-    m:{fr:"En reculant peu à peu, elle fait migrer le méandre. Les sous-berges et les racines qu'elle met à nu offrent des caches recherchées par les truites.",
-       en:"As it slowly retreats, the meander migrates. The undercuts and exposed roots provide hiding places sought by trout."},
-    f:{fr:["Pente : forte","Processus : érosion","Habitat : caches, sous-berges"],en:["Slope: steep","Process: erosion","Habitat: cover, undercut banks"]}},
-  convexe:{c:"#e2c46b",n:{fr:"Banc de convexité",en:"Point bar"},
-    d:{fr:"Plage de graviers et de sables en pente douce, à l'intérieur de la courbe.",en:"Gently sloping bar of gravel and sand on the inside of the bend."},
-    m:{fr:"Le courant y ralentit et dépose sa charge. Ces bordures peu profondes et calmes peuvent accueillir les plus jeunes poissons.",
-       en:"The current slows down and drops its load. These shallow, calm margins can host the youngest fish."},
-    f:{fr:["Pente : douce","Processus : dépôt","Fond : graviers, sables"],en:["Slope: gentle","Process: deposition","Bed: gravel, sand"]}},
-  ilot:{c:"#b9c97a",n:{fr:"Îlot",en:"Mid-channel bar"},
-    d:{fr:"Dépôt de graviers au milieu du lit, qui partage le courant en deux bras.",en:"Gravel deposit in the middle of the channel that splits the flow into two arms."},
-    m:{fr:"Il se forme là où le courant ralentit sur une zone large. Les crues le déplacent ; s'il est colonisé par la végétation (saules), il se stabilise. Les deux bras offrent des vitesses et des profondeurs différentes.",
-       en:"It forms where the current slows over a wide area. Floods move it; once colonised by vegetation (willows) it becomes stable. The two arms offer different speeds and depths."},
-    f:{fr:["Origine : dépôt","Mobile : remanié par les crues","Habitat : diversité des courants"],en:["Origin: deposition","Mobile: reshaped by floods","Habitat: varied currents"]}},
-  blocs:{c:"#a9a59a",n:{fr:"Blocs et rochers",en:"Boulders"},
-    d:{fr:"Gros blocs posés sur le fond ou émergeant, fréquents dans les rivières à truites à pente assez forte.",en:"Large boulders on the bed or sticking out, common in fairly steep trout streams."},
-    m:{fr:"Chaque bloc casse le courant : juste derrière, une zone calme permet à une truite de se tenir sans effort en guettant les invertébrés qui dérivent. Les blocs créent aussi des remous et diversifient les abris.",
-       en:"Each boulder breaks the current: just behind it, a calm zone lets a trout hold position effortlessly while watching for drifting invertebrates. Boulders also create eddies and add shelter."},
-    f:{fr:["Rôle : abri, poste de chasse","Effet : remous, brassage de l'eau","Habitat : invertébrés sous les pierres","Tailles : galets, blocs, gros blocs (modèle)"],en:["Role: shelter, feeding station","Effect: eddies, water mixing","Habitat: invertebrates under stones","Sizes: cobbles, boulders, large boulders (model)"]}},
-  herbier:{c:"#6fbf73",n:{fr:"Herbier de renoncules",en:"Water-crowfoot bed"},
-    d:{fr:"Plantes aquatiques fixées au fond, dont les tiges souples ondulent dans le courant. Ici : des renoncules, avec des mousses sur les blocs.",en:"Rooted aquatic plants whose flexible stems wave in the current. Here: water-crowfoot, with mosses on the boulders."},
-    m:{fr:"Les renoncules (renoncule peltée, renoncule en pinceau) forment des herbiers dans des cours d'eau plutôt courants et permanents. Ils ne forment de gros herbiers qu'en zone ensoleillée : l'ombrage les limite, alors que l'absence totale d'ombrage peut les faire proliférer. Les mousses (Fontinalis) se fixent sur les pierres en eau rapide.",
-       en:"Water-crowfoots (pond and stream water-crowfoot) form beds in fairly fast, permanent streams. They only form large beds in sunlit areas: shade limits them, whereas a total lack of shade can make them proliferate. Mosses (Fontinalis) attach to stones in fast water."},
-    f:{fr:["Où : radiers et plats courants peu profonds","Lumière : seulement en zone ensoleillée","Mousses : sur les blocs en eau rapide, surtout à l'ombre","Modèle : seuils de profondeur, courant et lumière = ordres de grandeur non vérifiés"],
-       en:["Where: shallow riffles and fast flats","Light: only in sunlit areas","Mosses: on boulders in fast water, mostly in shade","Model: depth, current and light thresholds are unverified orders of magnitude"]}},
-  litMajeur:{c:"#c7d36b",n:{fr:"Lit majeur",en:"Floodplain"},
-    d:{fr:"Fond de vallée plat que la rivière envahit lors des crues, au-delà de ses berges. Il est bordé ici par un talus puis par les versants.",
-       en:"Flat valley floor that the river floods beyond its banks. Here it is bordered by a bank, then by the valley sides."},
-    m:{fr:"Quand le débit dépasse ce que le lit mineur peut contenir, l'eau déborde, ralentit et dépose des limons. Les prairies inondables et les bras morts servent de zones de frai et de refuge à certaines espèces, comme le brochet. Utilisez le curseur « Crue » pour l'inonder.",
-       en:"When the flow exceeds what the main channel can hold, water spills over, slows down and drops silt. Flooded meadows and oxbows serve as spawning and refuge areas for some species, such as pike. Use the 'Flood' slider to flood it."},
-    f:{fr:["Inondé : lors des crues","Dépôts : limons","Rôle : expansion des crues, frayères (brochet)"],en:["Flooded: during floods","Deposits: silt","Role: flood storage, spawning (pike)"]}}
+  troncon:{"c":"#9fd17a","n":{"fr":"Le tronçon","en":"The reach"},"d":{"fr":"Un tronçon de rivière à truites généré à partir de règles générales de géomorphologie : méandres irréguliers, radiers et mouilles, îlots, blocs, lit mineur et lit majeur.","en":"A trout-stream reach generated from general geomorphology rules: irregular meanders, riffles and pools, islands, boulders, main channel and floodplain."},"m":{"fr":"Le tracé suit des règles publiées : rayon de courbure des méandres de 2 à 3 largeurs, longueur d'onde d'environ 11 largeurs, alternance de mouilles et de radiers tous les 5 à 7 largeurs en moyenne. Les valeurs exactes (largeur, profondeurs, proportions) sont des choix du modèle, pas des mesures d'un site réel. Chaque « autre rivière » est un nouveau tirage des mêmes règles. Le courant va de l'étiquette « Amont » vers l'étiquette « Aval ».","en":"The layout follows published rules: meander curvature radius of 2 to 3 channel widths, wavelength of about 11 widths, pools and riffles alternating every 5 to 7 widths on average. Exact values (width, depths, proportions) are model choices, not measurements of a real site. Each 'other river' is a new draw from the same rules. Water flows from the 'Upstream' label to the 'Downstream' label."},"f":{"fr":["Échelle : 1 unité = 1 mètre (modèle)","Hauteurs non exagérées","Rivière schématique, pas un site réel"],"en":["Scale: 1 unit = 1 metre (model)","Heights not exaggerated","Schematic river, not a real site"]},"s":["LW60","W86","NEH","LWM64","KM78"],"mod":true},
+  litMineur:{"c":"#7fb6c9","n":{"fr":"Lit mineur","en":"Main channel"},"d":{"fr":"Chenal où l'eau s'écoule en dehors des crues, entre les deux berges.","en":"Channel where water flows outside floods, between the two banks."},"m":{"fr":"Sa largeur et sa profondeur changent sans cesse : large et peu profond sur les radiers, plus étroit et creux dans les mouilles. Dans ce modèle, sa largeur varie d'environ 5 à 10 m (le plus large autour des îlots).","en":"Its width and depth keep changing: wide and shallow on riffles, narrower and deeper in pools. In this model its width ranges from about 5 to 10 m (widest around islands)."},"f":{"fr":["Limite : les berges","Formes : radiers, plats, mouilles","Largeur : variable"],"en":["Limit: the banks","Forms: riffles, runs, pools","Width: variable"]},"mod":true},
+  radier:{"c":"#5fd0e3","n":{"fr":"Radier","en":"Riffle"},"d":{"fr":"Zone peu profonde où l'eau court vite sur des graviers et des galets. La surface est agitée et l'eau bien brassée.","en":"Shallow area where water runs fast over gravel and cobbles. The surface is broken and the water well mixed."},"m":{"fr":"La femelle truite fario creuse son nid de ponte (frayère) dans les graviers. Les études de terrain la placent le plus souvent là où le courant s'accélère, en fin de mouille ou en début de radier, sur des graviers de 2 à 5 cm dans moins de 30 cm d'eau, où l'eau circule dans le gravier et oxygène les œufs. Les jeunes truites vivent aussi dans ces zones.","en":"The female brown trout digs her nest (redd) in the gravel. Field studies most often place it where the current accelerates, at the pool tail or riffle head, on 2 to 5 cm gravel in less than 30 cm of water, where water flows through the gravel and oxygenates the eggs. Young trout also live in these areas."},"f":{"fr":["Profondeur : faible","Courant : rapide","Fond : graviers, galets","Rôle : reproduction, nurserie, nourriture"],"en":["Depth: shallow","Current: fast","Bed: gravel, cobbles","Role: spawning, nursery, food"]},"s":["BM02","BFPP365"]},
+  mouille:{"c":"#3f7fdc","n":{"fr":"Mouille","en":"Pool"},"d":{"fr":"Fosse plus profonde où le courant ralentit, creusée le plus souvent à l'extérieur d'une courbe. Le fond y est plus fin (sables, limons).","en":"Deeper hollow where the current slows, usually scoured on the outside of a bend. The bed is finer (sand, silt)."},"m":{"fr":"Les grosses truites y cherchent de la profondeur et des abris. En hiver, des truites fario de plus de 33 cm évitaient les mouilles de moins de 60 cm de profondeur ou presque sans abri (étude du Midwest américain). Dans les courbes, le courant creuse le fond : c'est là que se forment les mouilles les plus profondes. Leur espacement moyen est de 5 à 7 largeurs, avec de fortes variations.","en":"Large trout look there for depth and cover. In winter, brown trout over 33 cm avoided pools shallower than 60 cm or with almost no cover (US Midwest study). In bends, the current scours the bed, which forms the deepest pools. Their average spacing is 5 to 7 widths, with wide variation."},"f":{"fr":["Profondeur : forte (relative)","Courant : lent","Fond : sables, limons","Rôle : abri des adultes"],"en":["Depth: deep (relative)","Current: slow","Bed: sand, silt","Role: shelter for adults"]},"s":["D18","NEH","LWM64","KM78","G94","M95"]},
+  meandre:{"c":"#d97757","n":{"fr":"Méandre","en":"Meander"},"d":{"fr":"Courbe naturelle du cours d'eau. Le courant le plus fort est dévié vers l'extérieur de la courbe.","en":"Natural bend of the river. The strongest current is pushed towards the outside of the bend."},"m":{"fr":"Le rayon de courbure des méandres vaut le plus souvent 2 à 3 fois la largeur du lit, quelle que soit la taille de la rivière ; leur forme dépend surtout de la dynamique de l'écoulement. L'eau érode la rive extérieure (concave) et dépose graviers et sables sur la rive intérieure (convexe). Aucun méandre n'est identique : amplitude et longueur varient.","en":"The curvature radius of meanders is most often 2 to 3 times the channel width, whatever the river size; their shape depends mainly on flow dynamics. Water erodes the outer (concave) bank and drops gravel and sand on the inner (convex) bank. No two meanders are alike: amplitude and length vary."},"f":{"fr":["Rayon de courbure : 2 à 3 largeurs (valeur la plus fréquente)","Longueur d'onde : environ 11 largeurs","Érosion : rive concave ; dépôt : rive convexe","Mouilles : surtout dans les courbes ; radiers : entre les courbes"],"en":["Curvature radius: 2 to 3 widths (most frequent)","Wavelength: about 11 widths","Erosion: concave bank; deposition: convex bank","Pools: mostly in bends; riffles: between bends"]},"s":["LW60","W86","NEH"]},
+  concave:{"c":"#c9905a","n":{"fr":"Rive concave","en":"Cut bank"},"d":{"fr":"Berge abrupte à l'extérieur de la courbe, sapée par le courant.","en":"Steep bank on the outside of the bend, undercut by the current."},"m":{"fr":"En reculant peu à peu, elle fait migrer le méandre. Les sous-berges et les racines qu'elle met à nu forment des caches ; dans le modèle, elles comptent comme abri (approximation géométrique, non dessinée).","en":"As it slowly retreats, the meander migrates. The undercuts and roots it exposes form hiding places; in the model they count as cover (geometric approximation, not drawn)."},"f":{"fr":["Pente : forte","Processus : érosion","Habitat : caches, sous-berges"],"en":["Slope: steep","Process: erosion","Habitat: cover, undercut banks"]},"mod":true},
+  convexe:{"c":"#e2c46b","n":{"fr":"Banc de convexité","en":"Point bar"},"d":{"fr":"Plage de graviers et de sables en pente douce, à l'intérieur de la courbe.","en":"Gently sloping bar of gravel and sand on the inside of the bend."},"m":{"fr":"Le courant y ralentit et dépose sa charge. Dans le modèle, ces bordures peu profondes et calmes sont favorables aux plus jeunes stades.","en":"The current slows down and drops its load. In the model, these shallow, calm margins are favourable to the youngest stages."},"f":{"fr":["Pente : douce","Processus : dépôt","Fond : graviers, sables"],"en":["Slope: gentle","Process: deposition","Bed: gravel, sand"]},"mod":true},
+  ilot:{"c":"#b9c97a","n":{"fr":"Îlot","en":"Mid-channel bar"},"d":{"fr":"Dépôt de graviers au milieu du lit, qui partage le courant en deux bras.","en":"Gravel deposit in the middle of the channel that splits the flow into two arms."},"m":{"fr":"Il se forme là où le courant ralentit sur une zone large. Les crues le déplacent ; s'il est colonisé par la végétation (saules), il se stabilise. Les deux bras offrent des vitesses et des profondeurs différentes.","en":"It forms where the current slows over a wide area. Floods move it; once colonised by vegetation (willows) it becomes stable. The two arms offer different speeds and depths."},"f":{"fr":["Origine : dépôt","Mobile : remanié par les crues","Habitat : diversité des courants"],"en":["Origin: deposition","Mobile: reshaped by floods","Habitat: varied currents"]}},
+  blocs:{"c":"#a9a59a","n":{"fr":"Blocs et rochers","en":"Boulders"},"d":{"fr":"Gros blocs posés sur le fond ou émergeant, fréquents dans les rivières à truites à pente assez forte.","en":"Large boulders on the bed or sticking out, common in fairly steep trout streams."},"m":{"fr":"Chaque bloc ralentit le courant juste derrière lui et diversifie les écoulements. Dans le modèle, un bloc compte comme un abri (pondération choisie par le modèle) ; même au maximum du curseur, les blocs ne couvrent qu'environ 18 % de la surface mouillée.","en":"Each boulder slows the current just behind it and diversifies the flow. In the model, a boulder counts as cover (weight chosen by the model); even at the slider maximum, boulders cover only about 18% of the wetted area."},"f":{"fr":["Rôle : abri, ralentissement local du courant","Habitat : invertébrés sous les pierres","Tailles : galets, blocs, gros blocs (rayons choisis par le modèle)","Modèle : 7 % de la surface mouillée à ×1,5 ; 18 % à ×3"],"en":["Role: shelter, local current slowing","Habitat: invertebrates under stones","Sizes: cobbles, boulders, large boulders (radii chosen by the model)","Model: 7% of the wetted area at ×1.5; 18% at ×3"]},"mod":true},
+  herbier:{"c":"#6fbf73","n":{"fr":"Herbier de renoncules","en":"Water-crowfoot bed"},"d":{"fr":"Plantes aquatiques fixées au fond, dont les tiges souples ondulent dans le courant. Ici : des renoncules, avec des mousses sur les blocs.","en":"Rooted aquatic plants whose flexible stems wave in the current. Here: water-crowfoot, with mosses on the boulders."},"m":{"fr":"Les renoncules (renoncule peltée, renoncule en pinceau) forment des herbiers dans des cours d'eau plutôt courants et permanents. Ils ne forment de gros herbiers qu'en zone ensoleillée : l'ombrage les limite, alors que l'absence totale d'ombrage peut les faire proliférer. Les mousses (Fontinalis) se fixent sur les pierres en eau rapide.","en":"Water-crowfoots (pond and stream water-crowfoot) form beds in fairly fast, permanent streams. They only form large beds in sunlit areas: shade limits them, whereas a total lack of shade can make them proliferate. Mosses (Fontinalis) attach to stones in fast water."},"f":{"fr":["Où : radiers et plats courants peu profonds","Lumière : seulement en zone ensoleillée (règle issue d'observations de terrain ; les sources indiquent que l'ombrage limite les herbiers)","Mousses : sur les blocs en eau rapide, surtout à l'ombre","Modèle : seuils de profondeur, de courant et de lumière choisis par le modèle (aucune renoncule en tronçon très ombragé)"],"en":["Where: shallow riffles and fast flats","Light: only in sunlit areas (rule from field observation; sources state that shade limits the beds)","Mosses: on boulders in fast water, mostly in shade","Model: depth, current and light thresholds chosen by the model (no water-crowfoot in heavily shaded reaches)"]},"s":["INPN3260"],"mod":true},
+  litMajeur:{"c":"#c7d36b","n":{"fr":"Lit majeur","en":"Floodplain"},"d":{"fr":"Fond de vallée plat que la rivière envahit lors des crues, au-delà de ses berges. Il est bordé ici par un talus puis par les versants.","en":"Flat valley floor that the river floods beyond its banks. Here it is bordered by a bank, then by the valley sides."},"m":{"fr":"Quand le débit dépasse ce que le lit mineur peut contenir, l'eau déborde, ralentit et dépose des limons. Les prairies inondables et les bras morts servent de zones de frai au brochet, de février à mai, à condition de rester en eau au moins 40 jours consécutifs. Utilisez le curseur « Crue » pour l'inonder.","en":"When the flow exceeds what the main channel can hold, water spills over, slows down and drops silt. Flooded meadows and oxbows serve as pike spawning areas from February to May, provided they stay under water for at least 40 consecutive days. Use the 'Flood' slider to flood it."},"f":{"fr":["Inondé : lors des crues","Dépôts : limons","Rôle : expansion des crues, frayères (brochet)"],"en":["Flooded: during floods","Deposits: silt","Role: flood storage, spawning (pike)"]},"s":["SHNA","UICN"]}
 };
+/* ===== REFERENCES (bibliographie citee par les fiches et les bulles d'information) ===== */
+const RVREFS=[
+  {"k":"LW60","s":"Leopold et Wolman 1960","t":"Leopold L.B., Wolman M.G. (1960). River meanders. Geological Society of America Bulletin 71(6) : 769-793.","u":"https://pubs.usgs.gov/publication/70185557"},
+  {"k":"W86","s":"Williams 1986","t":"Williams G.P. (1986). River meanders and channel size. Journal of Hydrology 88(1-2).","u":"https://pubs.usgs.gov/publication/70015687"},
+  {"k":"NEH","s":"NRCS, NEH 654-12","t":"USDA-NRCS. National Engineering Handbook, Part 654 (Stream Restoration Design), chapitre 12.","u":"https://irrigationtoolbox.com/NEH/Part%20654/CHAPTERS/Chapter-12.pdf"},
+  {"k":"LWM64","s":"Leopold et al. 1964","t":"Leopold L.B., Wolman M.G., Miller J.P. (1964). Fluvial Processes in Geomorphology. W.H. Freeman, San Francisco.","u":""},
+  {"k":"KM78","s":"Keller et Melhorn 1978","t":"Keller E.A., Melhorn W.N. (1978). Rhythmic spacing and origin of pools and riffles. Geological Society of America Bulletin.","u":""},
+  {"k":"G94","s":"Gregory et al. 1994","t":"Gregory K.J. et al. (1994). Stability of the pool-riffle sequence in changing river channels. Regulated Rivers 9.","u":"https://onlinelibrary.wiley.com/doi/abs/10.1002/rrr.3450090104"},
+  {"k":"M95","s":"Montgomery et al. 1995","t":"Montgomery D.R. et al. (1995). Pool spacing in forest channels. Water Resources Research 31.","u":"http://geomorphology.sese.asu.edu/Papers/Montgomery-Buffington-1995-WR-Pool%20spacing%20in%20forest%20channels.pdf"},
+  {"k":"D18","s":"Dieterman et al. 2018","t":"Dieterman D.J. et al. (2018). Winter habitat selection by large brown trout in streams with and without habitat rehabilitation. North American Journal of Fisheries Management 38.","u":"https://onlinelibrary.wiley.com/doi/abs/10.1002/nafm.10025"},
+  {"k":"GU02","s":"Gurnell et al. 2002","t":"Gurnell A.M., Piégay H., Swanson F.J., Gregory S.V. (2002). Large wood and fluvial processes. Freshwater Biology 47 : 601-619.","u":"http://andrewsforest.oregonstate.edu/pubs/pdf/pub3010.pdf"},
+  {"k":"DW03","s":"Dolloff et Warren 2003","t":"Dolloff C.A., Warren M.L. Jr. (2003). Fish relationships with large wood in small streams. American Fisheries Society Symposium 37 : 179-193.","u":"https://doi.org/10.47886/9781888569568.ch9"},
+  {"k":"INPN3260","s":"INPN, habitat 3260","t":"MNHN, INPN. Cahiers d'habitats Natura 2000, habitat 3260 (rivières à renoncules), fiches 3260_3 et 3260_4.","u":"https://inpn.mnhn.fr/docs/cahab/habitats-declines/3260_3.pdf"},
+  {"k":"BFPP365","s":"BFPP 2002 (Armorique)","t":"Frayères de truite du Massif armoricain. Bulletin Français de la Pêche et de la Pisciculture 365 : 435 (2002).","u":"https://www.kmae-journal.org/articles/kmae/pdf/2002/02/kmae2002365p435.pdf"},
+  {"k":"LOUR93","s":"Delacoste et al. 1993","t":"Delacoste et al. (1993). Frayères de truite de la Neste du Louron. Bulletin Français de la Pêche et de la Pisciculture 331 : 341-356.","u":"https://www.kmae-journal.org/articles/kmae/abs/1993/04/kmae199333102/kmae199333102.html"},
+  {"k":"CHEV","s":"BFPP 2003 (Chevenne)","t":"Frayères de truite du torrent de la Chevenne (Haute-Savoie). Bulletin Français de la Pêche et de la Pisciculture (2003).","u":"https://www.kmae-journal.org/10.1051/kmae:2003021"},
+  {"k":"EA","s":"Environment Agency (R.-U.)","t":"Environment Agency (Royaume-Uni). The thermal biology of brown trout and Atlantic salmon.","u":"https://assets.publishing.service.gov.uk/media/5a757e3040f0b6397f35edaa/scho1008boue-e-e.pdf"},
+  {"k":"EH98","s":"Elliott et Hurley 1998","t":"Elliott J.M., Hurley M.A. (1998). Journal of Animal Ecology 67 : 280-286 (régulation de la population de truites).","u":""},
+  {"k":"BM02","s":"Baglinière et Maisse 2002","t":"Baglinière J.L., Maisse G. (2002). La biologie de la truite commune (Salmo trutta L.) dans la rivière Scorff, Bretagne : une synthèse des études de 1972 à 1997. INRA Productions Animales 15(5) : 319-331.","u":"https://productions-animales.org/article/download/3711/11643/28587"},
+  {"k":"GARD","s":"FD Gard","t":"Fédération de pêche du Gard. La période de reproduction des truites.","u":"https://www.pechegard.com/la-periode-de-reproduction-des-truites/"},
+  {"k":"ALLIER","s":"FD Allier","t":"Fédération de pêche de l'Allier. Fiche truite fario.","u":"https://www.federation-peche-allier.fr/project/truite/"},
+  {"k":"MO05","s":"Moore et al. 2005","t":"Moore R.D., Spittlehouse D.L., Story A. (2005). Riparian microclimate and stream temperature response to forest harvesting : a review. Journal of the American Water Resources Association 41 : 813-834.","u":""},
+  {"k":"BR11","s":"Broadmeadow et al. 2011","t":"Broadmeadow S.B. et al. (2011). The influence of riparian shade on lowland stream water temperatures in southern England and their viability for brown trout. River Research and Applications 27 : 226-237.","u":"https://cdn.forestresearch.gov.uk/2010/05/rra-1354.pdf"},
+  {"k":"VI08","s":"Vigier 2008","t":"Vigier (2008). Sondes thermiques, bassin des Usses (25 stations). Fédération de Haute-Savoie pour la pêche, rapport FDP74.08/02.","u":""},
+  {"k":"JE09","s":"Jensen et al. 2009 (USGS)","t":"Jensen et al. (2009), méta-analyse sur les fines dans les frayères, résumée dans USGS Scientific Investigations Report 2024-5077.","u":"https://pubs.usgs.gov/publication/sir20245077"},
+  {"k":"LO23","s":"Louhi et al. 2023","t":"Louhi P. et al. (2023). Ecosphere 14(1), e4361 (sable fin et matière organique dans le gravier, truite fario).","u":"https://doi.org/10.1002/ecs2.4361"},
+  {"k":"EIFAC","s":"EIFAC (ammoniac)","t":"EIFAC / Water Research Centre : critère provisoire pour l'ammoniac non ionisé (NH3) chez les salmonidés, 0,025 mg/L, cité dans un document du California State Water Board.","u":"https://waterboards.ca.gov/waterrights/water_issues/programs/bay_delta/deltaflow/docs/exhibits/sac_rcsd/srcsd_exh1s.pdf"},
+  {"k":"KA03","s":"Källqvist et al. 2003","t":"Källqvist et al. (2003). Zinc et premiers stades de la truite fario. NIVA.","u":"https://niva.brage.unit.no/niva-xmlui/handle/11250/212100"},
+  {"k":"BH07","s":"Brinkman et Hansen 2007","t":"Brinkman S.F., Hansen D.L. (2007). Toxicity of cadmium to early life stages of brown trout at multiple water hardnesses. Environmental Toxicology and Chemistry.","u":"https://cpw.state.co.us/Documents/Research/Aquatic/pdf/Publications/Toxicityofcadmium2007.pdf"},
+  {"k":"R436","s":"Code de l'environnement","t":"Code de l'environnement, article R.436-6 (périodes d'ouverture de la pêche).","u":""},
+  {"k":"DORISAEC","s":"DORIS, arc-en-ciel","t":"DORIS (FFESSM). Oncorhynchus mykiss, truite arc-en-ciel.","u":"https://doris.ffessm.fr/Especes/Oncorhynchus-mykiss-Truite-arc-en-ciel-2308"},
+  {"k":"BO11","s":"Baglinière et Ombredane 2011","t":"Baglinière J.L., Ombredane D. (2011). La truite arc-en-ciel (Oncorhynchus mykiss), citée dans une fiche de synthèse.","u":"https://www.researchgate.net/publication/281919970_La_truite_arc_en_ciel_Onchorynchus_mykiss_Richardson_1936"},
+  {"k":"FD21","s":"FD Côte-d'Or","t":"Fédération de pêche de Côte-d'Or. Fiche truite arc-en-ciel.","u":"https://www.fedepeche21.com/media/2017/03/Truite-AeC.pdf"},
+  {"k":"RHONE","s":"FD Rhône 2012","t":"Faure J.-P. (2012). Étude génétique des populations de truites fario du département du Rhône. Fédération du Rhône pour la pêche, rapport final, avril 2012.","u":""},
+  {"k":"PERCHE","s":"AAPPMA du Perche","t":"Groupement des AAPPMA du Pays du Perche, page « Les déversements ».","u":"https://groupementpecheduperche.com"},
+  {"k":"N2000CHA","s":"Fiche Natura 2000 chabot","t":"Fiche « Le chabot commun » (code Natura 2000 1163), DREAL Grand Est.","u":"https://www.grand-est.developpement-durable.gouv.fr/IMG/pdf/le_chabot_commun_cle1f9ac4.pdf"},
+  {"k":"AB05","s":"Abdoli et al. 2005","t":"Abdoli A., Pont D., Sagnes P. (2005). Populations de chabot du bassin du Bez (âge, croissance, fécondité).","u":""},
+  {"k":"RE09","s":"Reyjol et al. 2009","t":"Reyjol Y. et al. (2009). Effets de la température sur le chabot, bassin du Bez.","u":""},
+  {"k":"DORISVAI","s":"DORIS, vairon","t":"DORIS (FFESSM). Phoxinus phoxinus, le vairon.","u":"https://doris.ffessm.fr/Especes/Phoxinus-phoxinus-Vairon-1656"},
+  {"k":"OPSVAI","s":"Observatoire Seine-Normandie","t":"Observatoire des poissons de Seine-Normandie. Fiche vairon.","u":"https://observatoire-poissons-seine-normandie.fr/poissons/vairon"},
+  {"k":"KE20","s":"Keith et al. 2020","t":"Keith P. et al. (2020). Les poissons d'eau douce de France. Biotope / MNHN ; fiche chevaine par Changeux, Le Louarn et Persat, p. 377-380.","u":"https://horizon.documentation.ird.fr/exl-doc/pleins_textes/2025-07/010082967.pdf"},
+  {"k":"CG13","s":"Comte et Grenouillet 2013","t":"Comte L., Grenouillet G. (2013). Ecography 36 : 1236-1246 (décalage de l'aire de 32 espèces de poissons de rivière).","u":""},
+  {"k":"FI13","s":"Findlay 2013","t":"Findlay M. (2013). Thèse, Université de Durham (écrevisse signal, chabot et truite).","u":"https://etheses.durham.ac.uk/id/eprint/6967"},
+  {"k":"BU05","s":"Bubb et al. 2005","t":"Bubb D.H., Thom T.J., Lucas M.C. (2005). Knowledge and Management of Aquatic Ecosystems 376-377 : 665-673 (vitesse de progression de l'écrevisse signal).","u":""},
+  {"k":"SHNA","s":"SHNA-OFAB (brochet)","t":"SHNA-OFAB. Inventaire des zones de reproduction potentielles du brochet sur trois cours d'eau de l'Yonne.","u":"https://www.shna-ofab.fr/fichiers/bn-8-p91-95_1450450387.pdf"},
+  {"k":"UICN","s":"UICN France (brochet)","t":"UICN France, fiche brochet (relayée par Futura Sciences).","u":"https://www.futura-sciences.com/planete/definitions/zoologie-brochet-7729/"},
+];
+function rvRefNum(k){const i=RVREFS.findIndex(r=>r.k===k);if(i<0){console.warn("[refs] cle inconnue : "+k);return "?";}return String(i+1);}
+function rvRefLink(k){const i=RVREFS.findIndex(r=>r.k===k);if(i<0)return "";const r=RVREFS[i],lab="["+(i+1)+"] "+esc(r.s);
+  return r.u?'<a href="'+esc(r.u)+'" target="_blank" rel="noopener" title="'+esc(r.t)+'">'+lab+'</a>':'<span title="'+esc(r.t)+'">'+lab+'</span>';}
+function rvRefsTxt(l){return (l==="en"?"Each value comes from the reference cited next to it. A value marked 'model choice' is a modelling parameter without field measurement. Results are teaching orders of magnitude, not predictions. References (consulted 20-27 October 2026):\n":"Chaque valeur vient de la référence citée à côté. Une valeur indiquée « choix du modèle » est un paramètre de modélisation sans mesure de terrain. Les résultats sont des ordres de grandeur pédagogiques, pas des prédictions. Références (consultées du 20 au 27 octobre 2026) :\n")+RVREFS.map((r,i)=>"["+(i+1)+"] "+r.t+(r.u?" "+r.u:"")).join("\n");}
+(function(){const o={srcT:{fr:"Sources :",en:"Sources:"},modelNote:{fr:"Les valeurs décrites comme « choix du modèle » sont des paramètres de modélisation, pas des mesures de terrain.",en:"Values described as 'model choice' are modelling parameters, not field measurements."},
+  iSrc:{fr:"ⓘ Références",en:"ⓘ References"},iSrcT:{fr:rvRefsTxt("fr"),en:rvRefsTxt("en")}};
+  for(const k in o)I18N[k]=o[k];
+  for(const k in I18N)for(const l of ["fr","en"]){const v=I18N[k][l];if(typeof v==="string"&&v.indexOf("{r:")>=0)I18N[k][l]=v.replace(/\{r:(\w+)\}/g,(m,x)=>rvRefNum(x));}})();
+/* ===== FIN REFERENCES ===== */
 
 /* =====================================================================
    4. HYDRO : geometrie PURE du troncon (aucun objet 3D ici)
@@ -1362,8 +1492,6 @@ defModule({id:"terrain",nom:{fr:"Relief et lit",en:"Terrain and bed"},
    sans derive dans le temps. c = (u / mediane)^0,8, borne entre RVFLO.cmin et RVFLO.cmax. Le curseur "Vitesse du courant (visuelle)" reste un multiplicateur global. */
 const RVUWC={part:true,link:true};   /* defauts : cochees (choix de l'utilisateur, 26 oct.) */
 const RVFLO={cmin:0.55,cmax:1.7,lisse:6,expo:0.8};
-Object.assign(I18N,{uwPart:{fr:"Particules en suspension sous l'eau",en:"Suspended particles underwater"},
-  flowLink:{fr:"Courant visuel lié à la vitesse par tronçon (radier / mouille)",en:"Visual current tied to speed per reach (riffle / pool)"}});
 function rvFlowBuild(H){
   const N=H.N,U=new Float32Array(N),Kc=new Float32Array(N).fill(1),X=new Float64Array(N),raw=new Float32Array(N),sm=new Float32Array(N);
   let G=null;try{G=(H.GR&&H.GR.vel)?H.GR:rvGranulo(H);}catch(e){G=null;}
@@ -2198,6 +2326,7 @@ transformed.y*=1.0-0.18*aLean*rvT;`);
   }
 });
 /* ===== MODULES SUPPLEMENTAIRES (patchs) ===== */
+/* ##### GROUPE : Decor 3D : fond, frayeres, galets, bois mort, arbres, herbes, eau ##### */
 /* ===== BLOC GRANULO ===== */
 /* Granulometrie du lit : modele de competence (Shields) a un debit "formateur".
    Tout est un ORDRE DE GRANDEUR DU MODELE, pas une mesure. Classes : Wentworth (verifie). */
@@ -2314,13 +2443,7 @@ function rvFray(H,G,M,step){
   }
   return {pos,S,nr,M,secs:[...secs.values()],tot,wet};
 }
-DATA.frayere={c:"#ff7a3d",n:{fr:"Frayères potentielles",en:"Potential spawning grounds"},
-  d:{fr:"Zones où la truite pourrait creuser ses nids : gravier propre, eau peu profonde et courante. Plus la carte est chaude, plus l'endroit est favorable.",
-     en:"Places where trout could dig their nests: clean gravel, shallow flowing water. The hotter the map, the more suitable the spot."},
-  m:{fr:"La truite fario (Salmo trutta) pond dans un nid creusé dans le gravier. Les études citées (Massif armoricain, Pyrénées, Haute-Savoie) trouvent surtout des nids dans moins de 30 à 40 cm d'eau, sur des graviers d'environ 2 à 5 cm, dans le courant, souvent à la jonction entre une mouille et un radier. Le modèle combine ici profondeur, courant, taille des grains et position pour donner un score de 0 à 1. Les sources divergent sur le courant (moins de 20 cm/s dans les sites abrités du torrent de la Chevenne, jusqu'à 70 cm/s ailleurs) : ce sont des fourchettes, pas des seuils. Ce n'est pas un inventaire de terrain.",
-     en:"Brown trout (Salmo trutta) lay eggs in a nest dug into gravel. The studies used (Armorican Massif, Pyrenees, Haute-Savoie) mostly find nests in less than 30 to 40 cm of water, on gravel of about 2 to 5 cm, in the current, often at the junction between a pool and a riffle. The model combines depth, current, grain size and position into a score from 0 to 1. Sources disagree on current speed (below 20 cm/s in sheltered sites of the Chevenne torrent, up to 70 cm/s elsewhere): these are ranges, not thresholds. This is not a field survey."},
-  f:{fr:["Profondeur : environ 10 à 40 cm","Graviers : environ 1 à 5 cm (10 à 50 mm ; 0,2 à 5 cm selon les études)","Courant : de quasi nul (sites abrités) à ~70 cm/s ; sources discordantes","Position : queue de mouille / tête de radier (préférence)","Modèle : score 0 à 1, ordre de grandeur non mesuré"],
-     en:["Depth: about 10 to 40 cm","Gravel: about 1 to 5 cm (10 to 50 mm; 0.2 to 5 cm depending on the study)","Current: from almost none (sheltered sites) to ~70 cm/s; sources disagree","Position: pool tail / riffle head (preference)","Model: score 0 to 1, unmeasured order of magnitude"]}};
+DATA.frayere={"c":"#ff7a3d","n":{"fr":"Frayères potentielles","en":"Potential spawning grounds"},"d":{"fr":"Zones où la truite pourrait creuser ses nids : gravier propre, eau peu profonde et courante. Plus la carte est chaude, plus l'endroit est favorable.","en":"Places where trout could dig their nests: clean gravel, shallow flowing water. The hotter the map, the more suitable the spot."},"m":{"fr":"La truite fario (Salmo trutta) pond dans un nid creusé dans le gravier. Les études citées (Massif armoricain, Pyrénées, Haute-Savoie) trouvent surtout des nids dans moins de 30 à 40 cm d'eau, sur des graviers d'environ 2 à 5 cm, dans le courant, souvent à la jonction entre une mouille et un radier. Le modèle combine ici profondeur, courant, taille des grains et position pour donner un score de 0 à 1. Les sources divergent sur le courant (moins de 20 cm/s dans les sites abrités du torrent de la Chevenne, jusqu'à 70 cm/s ailleurs) : ce sont des fourchettes, pas des seuils. Ce n'est pas un inventaire de terrain.","en":"Brown trout (Salmo trutta) lay eggs in a nest dug into gravel. The studies used (Armorican Massif, Pyrenees, Haute-Savoie) mostly find nests in less than 30 to 40 cm of water, on gravel of about 2 to 5 cm, in the current, often at the junction between a pool and a riffle. The model combines depth, current, grain size and position into a score from 0 to 1. Sources disagree on current speed (below 20 cm/s in sheltered sites of the Chevenne torrent, up to 70 cm/s elsewhere): these are ranges, not thresholds. This is not a field survey."},"f":{"fr":["Profondeur : environ 10 à 40 cm","Graviers : environ 1 à 5 cm (10 à 50 mm ; 0,2 à 5 cm selon les études)","Courant : de quasi nul (sites abrités) à ~70 cm/s ; sources discordantes","Position : queue de mouille / tête de radier (préférence)","Modèle : score de 0 à 1 combinant ces critères (choix du modèle)"],"en":["Depth: about 10 to 40 cm","Gravel: about 1 to 5 cm (10 to 50 mm; 0.2 to 5 cm depending on the study)","Current: from almost none (sheltered sites) to ~70 cm/s; sources disagree","Position: pool tail / riffle head (preference)","Model: score from 0 to 1 combining these criteria (model choice)"]},"s":["BFPP365","LOUR93","CHEV","BM02"],"mod":true};
 defModule({id:"frayeres",defaut:false,nom:{fr:"Frayères potentielles (carte de chaleur)",en:"Potential spawning grounds (heat map)"},
   build(c){
     const H=c.HY,G=H.GR;
@@ -2725,13 +2848,7 @@ function rvBois(H,r,k,nr,step){
     {const l=0.4+1.4*r(),rr=0.01+0.02*r(),a=r()*6.28;brB(o.x,o.z,a,l,rr*1.3,r()<0.4?1:0,H.WL[i],barkF(BARK[3+Math.floor(r()*2)],0,0.3,H.WL[i]),0,0);st.twig++;}}
   return {B,BM,st,best};
 }
-DATA.boismort={c:"#b08968",n:{fr:"Bois mort et abris",en:"Deadwood and cover"},
-  d:{fr:"Souches à racines coincées dans les mouilles, arbres tombés, troncs en travers ou en long, amas de branches, et racines des arbres de berge qui plongent dans l'eau. Tailles et positions tirées au hasard.",
-     en:"Root-wad stumps wedged in pools, fallen trees, logs across or along the stream, brush piles, and bankside tree roots dipping into the water. Sizes and positions are random."},
-  m:{fr:"Le bois mort qui tombe d'une ripisylve forme des caches, des zones de courant ralenti et des postes d'affût pour les poissons ; les branchages s'accumulent en embâcles et les racines des berges creusent des sous-berges. Ici, de grosses souches à plaque de racines se coincent dans les mouilles, des arbres tombent avec leur houppier, certains troncs barrent le chenal, d'autres restent dans le sens du courant ou sur la berge, et les racines des arbres de berge courent sur le sol puis plongent dans l'eau. Chaque rivière générée tire de nouvelles positions et de nouvelles tailles. Le modèle en déduit un indice d'abri par tronçon, qui servira plus tard au jeu. Les nombres et les tailles sont des ordres de grandeur du modèle, pas un inventaire de terrain.",
-     en:"Dead wood falling from a riparian forest creates hiding places, slower-current zones and feeding stations for fish; brushwood piles up into log jams and bank roots carve undercut banks. Here, large root-wad stumps wedge into pools, trees fall with their crowns, some logs span the channel, others lie along the current or on the bank, and the roots of bankside trees run over the ground then dive into the water. Each generated river draws new positions and sizes. The model derives a cover index per reach, to be used later by the game. Numbers and sizes are model orders of magnitude, not a field survey."},
-  f:{fr:["Types : souches à racines, arbres tombés, troncs en travers / en long / sur la berge, amas de branches, racines de berge","Tailles : de brindilles à des troncs de plus de 9 m (tirage au hasard)","Rôle : abri, ralentissement du courant, poste d'affût","Modèle : quantités et tailles = ordres de grandeur non vérifiés"],
-     en:["Types: root-wad stumps, fallen trees, logs across / along / on the bank, brush piles, bank roots","Sizes: from twigs to trunks over 9 m (random draw)","Role: shelter, slower current, feeding station","Model: amounts and sizes are unverified orders of magnitude"]}};
+DATA.boismort={"c":"#b08968","n":{"fr":"Bois mort et abris","en":"Deadwood and cover"},"d":{"fr":"Souches à racines coincées dans les mouilles, arbres tombés, troncs en travers ou en long, amas de branches, et racines des arbres de berge qui plongent dans l'eau. Tailles et positions tirées au hasard.","en":"Root-wad stumps wedged in pools, fallen trees, logs across or along the stream, brush piles, and bankside tree roots dipping into the water. Sizes and positions are random."},"m":{"fr":"Le bois mort tombé d'une ripisylve crée des caches, des zones de courant ralenti et des mouilles ; en retirer fait perdre des mouilles et réduit le nombre et la taille des poissons. Ici, de grosses souches à plaque de racines se coincent dans les mouilles, des arbres tombent avec leur houppier, certains troncs barrent le chenal, d'autres restent dans le sens du courant ou sur la berge, et les racines des arbres de berge plongent dans l'eau. Chaque rivière générée tire de nouvelles positions et tailles ; le modèle en déduit un indice d'abri par tronçon. Les quantités et les tailles sont des choix du modèle, pas un inventaire de terrain.","en":"Dead wood fallen from a riparian forest creates hiding places, slower-current zones and pools; removing it loses pools and reduces fish numbers and size. Here, large root-wad stumps wedge into pools, trees fall with their crowns, some logs span the channel, others lie along the current or on the bank, and bankside tree roots dive into the water. Each generated river draws new positions and sizes; the model derives a cover index per reach. Amounts and sizes are model choices, not a field inventory."},"f":{"fr":["Types : souches à racines, arbres tombés, troncs en travers / en long / sur la berge, amas de branches, racines de berge","Tailles : de brindilles à des troncs de plus de 9 m (tirage au hasard)","Rôle : abri, ralentissement du courant, formation de mouilles","Modèle : quantités et tailles choisies par le modèle"],"en":["Types: root-wad stumps, fallen trees, logs across / along / on the bank, brush piles, bank roots","Sizes: from twigs to trunks over 9 m (random draw)","Role: shelter, slower current, pool formation","Model: amounts and sizes chosen by the model"]},"s":["DW03","GU02","M95"],"mod":true};
 defModule({id:"boismort",nom:{fr:"Bois mort et abris (troncs, souches, racines)",en:"Deadwood and cover (logs, stumps, roots)"},
   build(c){
     const H=c.HY,q=c.Q,hi=q.key==="high",md=q.key==="medium",R=rvBois(H,VEG.rng(H.seed*23+17),hi?1:md?0.7:0.45,hi?14:md?10:8,hi?0.3:md?0.45:0.7),tx=rvBarkTex(c);
@@ -2921,12 +3038,13 @@ function rvUWUpdate(){
 }
 /* ===== FIN BLOC EAU2 ===== */
 /* ===== FIN BLOC EAU ===== */
+/* ##### GROUPE : Navigation, tactile et halo de transparence ##### */
 /* ===== BLOC NAV ===== */
 /* A7 : (1) feuillage qui devient transparent par tramage ("dither" : pas de tri a faire, rendu net) : autour de la camera quand on est
    dans les arbres, et en vue d'ensemble (camera haute) pour ne pas cacher la riviere. (2) deplacement : clavier : fleches = se deplacer,
    W / S = monter / descendre (touches PHYSIQUES), Maj = rapide ; double-clic = aller la
    (sur l'eau : plonger) ; le pincement du pave tactile est capte meme au-dessus du panneau (plus de zoom de la page). */
-VEG.fd={can:{value:0},zero:{value:0},near:{value:11},nearE:{value:11},
+VEG.fd={can:{value:0},zero:{value:0},near:{value:0},nearE:{value:0},
   mask:{value:new THREE.DataTexture(new Uint8Array([0,0,0,255]),1,1,THREE.RGBAFormat)},maskO:{value:new THREE.Vector2(0,0)},maskS:{value:new THREE.Vector2(1,1)},maskFor:null};
 VEG.fd.mask.value.needsUpdate=true;
 function rvCanMaskBuild(H){                                      // carte de proximite de la riviere (sert au curseur "Transparence de la canopee")
@@ -2952,13 +3070,14 @@ VEG.fade=function(mat,useCan,k,br){const f=mat.onBeforeCompile,kk={value:k||1};m
   sh.fragmentShader=dec+sh.fragmentShader.replace("#include <clipping_planes_fragment>",
     "#include <clipping_planes_fragment>\n{float rvL=length(vViewPosition);float rvF=0.0;\n"+can+"float rvR=uRvNear*uRvK;if(rvR>0.05)rvF=max(rvF,1.0-smoothstep(rvR*0.5,rvR,rvL));\nif(rvF>0.0){float rvN=fract(52.9829189*fract(dot(gl_FragCoord.xy,vec2(0.06711056,0.00583715))));if(rvN<rvF)discard;}}");};};
 function rvFadeUpdate(){VEG.fd.nearE.value=UW.wet?0:VEG.fd.near.value;if(VEG.fd.maskFor!==HY){VEG.fd.maskFor=HY;rvCanMaskBuild(HY);}}      // sous l'eau : pas de halo ; carte refaite pour chaque nouvelle riviere
+const RVJ={f:0,sd:0,u:0};   // NAVTACTILE1 : joystick et boutons tactiles (valeurs progressives, comme des touches analogiques)
 const RVK={};
 window.addEventListener("keydown",e=>{if(/INPUT|TEXTAREA|SELECT/.test((e.target&&e.target.tagName)||"")||e.metaKey||e.ctrlKey||e.altKey)return;
   RVK[e.code]=true;if(/^Arrow/.test(e.code))e.preventDefault();});
 window.addEventListener("keyup",e=>{RVK[e.code]=false;});
 window.addEventListener("blur",()=>{for(const k in RVK)RVK[k]=false;});
 function rvNavUpdate(dt){
-  const K=RVK,f=(K.ArrowUp?1:0)-(K.ArrowDown?1:0),sd=(K.ArrowRight?1:0)-(K.ArrowLeft?1:0),u=(K.KeyW?1:0)-(K.KeyS?1:0);
+  const K=RVK,f=(K.ArrowUp?1:0)-(K.ArrowDown?1:0)+RVJ.f,sd=(K.ArrowRight?1:0)-(K.ArrowLeft?1:0)+RVJ.sd,u=(K.KeyW?1:0)-(K.KeyS?1:0)+RVJ.u;
   if(!f&&!sd&&!u)return;
   stopAuto();
   const d=camera.position.distanceTo(controls.target),sp=Math.max(1.5,Math.min(60,d*0.5))*(K.ShiftLeft||K.ShiftRight?3:1)*dt;
@@ -2967,6 +3086,27 @@ function rvNavUpdate(dt){
   V3.set(0,u*sp*0.8,0).addScaledVector(V1,f*sp).addScaledVector(V2,sd*sp);
   camera.position.add(V3);controls.target.add(V3);
 }
+/* ===== BLOC NAVTACTILE1 : avancer au doigt ===== */
+/* Au telephone, deux doigts font bouger la vue trop vite et il n'y avait aucun equivalent des fleches / W-S. Ici : un joystick (avancer, reculer, aller sur les cotes ; vitesse progressive, au plus 60 % de la vitesse clavier)
+   et deux boutons monter / descendre, alimentes comme les touches (rvNavUpdate). Affiches seulement sur ecran tactile ; le deplacement a deux doigts est aussi adouci (panSpeed). */
+{const coarse=("ontouchstart" in window)||navigator.maxTouchPoints>0;
+ if(coarse){
+  document.body.classList.add("rv-touch");controls.panSpeed=0.5;
+  const pad=document.createElement("div");pad.id="rvJoy";pad.innerHTML='<div id="rvJk"></div>';document.body.appendChild(pad);
+  const ud=document.createElement("div");ud.id="rvUd";ud.innerHTML='<button id="rvUp">\u25b2</button><button id="rvDn">\u25bc</button>';document.body.appendChild(ud);
+  const knob=pad.firstChild,RR=44,DEAD=0.12,MAXV=0.6;let act=null;
+  const set=(e)=>{const b=pad.getBoundingClientRect(),dx=e.clientX-(b.left+b.width/2),dy=e.clientY-(b.top+b.height/2),len=Math.hypot(dx,dy)||1,mag=Math.min(1,len/RR);
+    const k=Math.min(1,RR/len);knob.style.transform="translate("+(dx*k).toFixed(1)+"px,"+(dy*k).toFixed(1)+"px)";
+    const m=mag<DEAD?0:Math.pow((mag-DEAD)/(1-DEAD),1.5)*MAXV;RVJ.f=-dy/len*m;RVJ.sd=dx/len*m;};
+  const end=()=>{act=null;RVJ.f=0;RVJ.sd=0;knob.style.transform="translate(0,0)";};
+  pad.addEventListener("pointerdown",e=>{act=e.pointerId;pad.setPointerCapture(e.pointerId);set(e);e.preventDefault();});
+  pad.addEventListener("pointermove",e=>{if(act===e.pointerId)set(e);});
+  pad.addEventListener("pointerup",end);pad.addEventListener("pointercancel",end);
+  const hold=(id,v)=>{const b=document.getElementById(id);b.addEventListener("pointerdown",e=>{b.setPointerCapture(e.pointerId);RVJ.u=v;e.preventDefault();});
+    const stop=()=>{RVJ.u=0;};b.addEventListener("pointerup",stop);b.addEventListener("pointercancel",stop);};
+  hold("rvUp",0.6);hold("rvDn",-0.6);
+ }}
+/* ===== FIN BLOC NAVTACTILE1 ===== */
 renderer.domElement.addEventListener("dblclick",e=>{
   M2.set(e.clientX/window.innerWidth*2-1,-e.clientY/window.innerHeight*2+1);RC.setFromCamera(M2,camera);
   const tm=MODS.find(m=>m.id==="terrain"),wm=MODS.find(m=>m.id==="eau");
@@ -2986,16 +3126,11 @@ renderer.domElement.addEventListener("dblclick",e=>{
 {const sc=document.getElementById("sCan"),vc=document.getElementById("vCan");      // transparence de la canopee (feuillage et foret des versants), a toute altitude
  if(sc){sc.oninput=e=>{VEG.fd.can.value=+e.target.value/100;vc.textContent=e.target.value+" %";};sc.value=0;vc.textContent="0 %";}}
 /* ===== FIN BLOC HALO ===== */
+/* ##### GROUPE : Affluents et pressions anthropiques (decor 3D) ##### */
 /* ===== BLOC AFFLUENTS (rendu) ===== */
 /* A5b : rendu des affluents (ruban d'eau, memes materiaux que la riviere), fiche et texte. La zone de connexion (AFFC.mouth, derniers
    metres avant la riviere) disparait quand la case "Affluents connectes a la riviere" (Effets) est decochee : lit a sec, plus de lien. */
-DATA.affluent={c:"#6ec6b8",n:{fr:"Affluent (ruisseau)",en:"Tributary (small stream)"},
-  d:{fr:"Petit ruisseau qui se jette dans la rivière. Deux ou trois affluents sont tirés au hasard : ils suivent les mêmes règles que la rivière (méandres, radiers, mouilles), en plus petit.",
-     en:"Small stream flowing into the river. Two or three tributaries are drawn at random: they follow the same rules as the river (meanders, riffles, pools), only smaller."},
-  m:{fr:"Un affluent apporte de l'eau, des sédiments et tout ce qu'il charrie. Une pollution qui l'atteint (village, rejet d'usine, déjections animales) n'affecte la rivière qu'en AVAL de la confluence : l'amont reste intact et sert de point de comparaison. La case « Affluents (ruisseaux) » (Couches) les affiche ou les retire, eau et reflets au sol compris.",
-     en:"A tributary brings water, sediment and whatever it carries. Pollution reaching it (village, factory discharge, animal droppings) affects the river only DOWNSTREAM of the confluence: the upstream reach stays intact and serves as a comparison. The 'Tributaries (streams)' box (Layers) shows or hides them, water and ground reflections included."},
-  f:{fr:["Largeur : environ 2,4 m (modèle)","Profondeurs et galets : x0,6 par rapport à la rivière","Pollution : effet en aval de la confluence seulement","Affichage : case « Affluents » dans Couches"],
-     en:["Width: about 2.4 m (model)","Depths and pebbles: x0.6 compared with the river","Pollution: effect only downstream of the confluence","Display: 'Tributaries' box in Layers"]}};
+DATA.affluent={"c":"#6ec6b8","n":{"fr":"Affluent (ruisseau)","en":"Tributary (small stream)"},"d":{"fr":"Petit ruisseau qui se jette dans la rivière. Deux ou trois affluents sont tirés au hasard : ils suivent les mêmes règles que la rivière (méandres, radiers, mouilles), en plus petit.","en":"Small stream that flows into the river. Two or three tributaries are drawn at random: they follow the same rules as the river (meanders, riffles, pools), only smaller."},"m":{"fr":"Un affluent apporte de l'eau, des sédiments et tout ce qu'il charrie. Une pollution qui l'atteint (village, rejet d'usine, déjections animales) n'affecte la rivière qu'en AVAL de la confluence : l'amont reste intact et sert de point de comparaison. La case « Affluents (ruisseaux) » (Couches) les affiche ou les retire, eau et reflets au sol compris.","en":"A tributary brings water, sediment and whatever it carries. Pollution reaching it (village, factory discharge, animal droppings) affects the river only DOWNSTREAM of the confluence: the upstream reach stays intact and serves as a comparison. The 'Tributaries (streams)' box (Layers) shows or hides them, water and ground reflections included."},"f":{"fr":["Largeur : environ 2,4 m (modèle)","Profondeurs et galets : ×0,6 par rapport à la rivière","Pression anthropique : effet en aval de la confluence seulement","Affichage : case « Affluents » dans Couches"],"en":["Width: about 2.4 m (model)","Depths and cobbles: ×0.6 relative to the river","Human pressure: effect downstream of the confluence only","Display: 'Tributaries' checkbox in Layers"]},"mod":true};
 defModule({id:"affluents",nom:{fr:"Affluents (ruisseaux)",en:"Tributaries (streams)"},
   build(c){
     const H=c.HY,grp=new THREE.Group(),M=c.Q.waterAcross>=18?10:6,step=Math.max(2,c.Q.waterStep*2);
@@ -3035,24 +3170,9 @@ defModule({id:"affluents",nom:{fr:"Affluents (ruisseaux)",en:"Tributaries (strea
 /* A6 : (1) pression anthropique sur un affluent, au choix (Reglages) : petit hameau, prairie paturee, petite usine. Volumes SIMPLES et
    PROVISOIRES, poses a l'emplacement H.PRESS (voir rvAffPress). Defaut : aucune. Aucun impact calcule. (2) case "Afficher les lieux" ;
    (3) quand les affluents sont deconnectes, les reflets de lumiere au sol disparaissent aussi dans la zone de connexion a sec. */
-DATA.p_hameau={c:"#e0a96d",n:{fr:"Petit hameau",en:"Small hamlet"},
-  d:{fr:"Quelques maisons au bord de l'affluent (emplacement provisoire).",en:"A few houses beside the tributary (provisional placement)."},
-  m:{fr:"Les eaux usées domestiques, mal ou pas traitées, apportent de la matière organique et des nutriments. L'effet se cherche en aval du rejet ; le ruisseau en amont sert de référence. Le modèle ne calcule pas encore d'impact.",
-     en:"Poorly treated or untreated domestic wastewater brings organic matter and nutrients. The effect is looked for downstream of the discharge; the stream upstream serves as a reference. The model does not compute any impact yet."},
-  f:{fr:["Pression : rejets domestiques","Amont du rejet : référence","Aval : ruisseau, puis rivière après la confluence","Impact : pas encore modélisé"],
-     en:["Pressure: domestic discharges","Upstream of the discharge: reference","Downstream: stream, then river below the confluence","Impact: not modelled yet"]}};
-DATA.p_vaches={c:"#d9c27a",n:{fr:"Prairie pâturée",en:"Grazed meadow"},
-  d:{fr:"Prairie clôturée où paissent des vaches, avec accès au ruisseau (emplacement provisoire).",en:"Fenced meadow with grazing cows that can reach the stream (provisional placement)."},
-  m:{fr:"Piétinement des berges, déjections (matière organique, nutriments) et mise en suspension de particules fines qui colmatent les graviers : des effets décrits en aval d'un accès direct du bétail au cours d'eau. Le modèle ne calcule pas encore d'impact.",
-     en:"Bank trampling, droppings (organic matter, nutrients) and fine particles stirred up that clog the gravel: effects described downstream of direct livestock access to a stream. The model does not compute any impact yet."},
-  f:{fr:["Pression : bétail dans le ruisseau","Amont de la prairie : référence","Aval : ruisseau, puis rivière après la confluence","Impact : pas encore modélisé"],
-     en:["Pressure: livestock in the stream","Upstream of the meadow: reference","Downstream: stream, then river below the confluence","Impact: not modelled yet"]}};
-DATA.p_usine={c:"#9aa3ad",n:{fr:"Petite usine",en:"Small factory"},
-  d:{fr:"Un bâtiment industriel avec une conduite de rejet vers l'affluent (emplacement provisoire).",en:"An industrial building with a discharge pipe to the tributary (provisional placement)."},
-  m:{fr:"Un rejet industriel peut apporter des substances chimiques ou de la chaleur. Il touche d'abord l'affluent en aval du rejet, puis la rivière en aval de la confluence, diluée par son débit. Le modèle ne calcule pas encore d'impact.",
-     en:"An industrial discharge can bring chemicals or heat. It first affects the tributary downstream of the outlet, then the river below the confluence, diluted by its flow. The model does not compute any impact yet."},
-  f:{fr:["Pression : rejet industriel","Amont du rejet : référence","Aval : ruisseau, puis rivière diluée","Impact : pas encore modélisé"],
-     en:["Pressure: industrial discharge","Upstream of the outlet: reference","Downstream: stream, then diluted river","Impact: not modelled yet"]}};
+DATA.p_hameau={"c":"#e0a96d","n":{"fr":"Petit hameau","en":"Small hamlet"},"d":{"fr":"Quelques maisons au bord de l'affluent (position et taille choisies par le modèle).","en":"A few houses beside the tributary (position and size chosen by the model)."},"m":{"fr":"Les eaux usées domestiques mal traitées apportent matière organique et ammoniac. Pour les salmonidés, le critère provisoire est de 0,025 mg/L d'ammoniac non ionisé ; des premiers stades de truite arc-en-ciel mouraient à plus de 70 % dès 0,027 mg/L (eau dure). Dans le modèle (menu Pressions anthropiques), l'ammoniac touche surtout les œufs et les alevins, en aval du rejet seulement ; l'oxygène n'est pas modélisé. L'amont sert de référence.","en":"Poorly treated domestic wastewater brings organic matter and ammonia. For salmonids, the provisional criterion is 0.025 mg/L of un-ionised ammonia; early stages of rainbow trout died at over 70% from 0.027 mg/L (hard water). In the model (Human pressures menu), ammonia mainly affects eggs and fry, downstream of the discharge only; oxygen is not modelled. The upstream reach is the reference."},"f":{"fr":["Pression : rejets domestiques (ammoniac)","Seuil publié : 0,025 mg/L de NH3 (critère provisoire)","Amont du rejet : référence ; aval : ruisseau, puis rivière après la confluence","Effet atténué vers l'aval : portée choisie par le modèle (500 m)"],"en":["Pressure: domestic discharge (ammonia)","Published threshold: 0.025 mg/L NH3 (provisional criterion)","Upstream of discharge: reference; downstream: stream, then river after the confluence","Effect fades downstream: range chosen by the model (500 m)"]},"s":["EIFAC"],"mod":true};
+DATA.p_vaches={"c":"#d9c27a","n":{"fr":"Prairie pâturée","en":"Grazed meadow"},"d":{"fr":"Prairie clôturée où paissent des vaches, avec accès au ruisseau (position et taille choisies par le modèle).","en":"Fenced meadow with grazing cows and access to the stream (position and size chosen by the model)."},"m":{"fr":"Le bétail piétine les berges, apporte déjections, nutriments et particules fines qui colmatent les graviers en aval d'un accès direct au cours d'eau. Dans les frayères, chaque point de fines en plus fait perdre 4 à 18 % de survie des œufs aux alevins (méta-analyse sur saumons du Pacifique et truite arc-en-ciel) ; chez la truite fario, le sable fin et la matière organique altèrent la survie des premiers stades. Dans le modèle, le colmatage réduit la survie des œufs de truite fario et de chabot, en aval seulement ; le piétinement n'est pas modélisé.","en":"Cattle trample banks and add droppings, nutrients and fine particles that clog gravels downstream of direct stream access. In spawning gravels, each extra percentage point of fines cuts egg-to-fry survival by 4 to 18% (meta-analysis on Pacific salmon and rainbow trout); in brown trout, fine sand and organic matter impair early-stage survival. In the model, clogging reduces survival of brown trout and bullhead eggs, downstream only; trampling is not modelled."},"f":{"fr":["Pression : bétail dans le ruisseau (fines, colmatage)","Publié : +1 point de fines = -4 à -18 % de survie œuf-alevin","Amont de la prairie : référence ; aval : ruisseau, puis rivière","Effet atténué vers l'aval : portée choisie par le modèle (300 m)"],"en":["Pressure: cattle in the stream (fines, clogging)","Published: +1 point of fines = -4 to -18% egg-to-fry survival","Upstream of the meadow: reference; downstream: stream, then river","Effect fades downstream: range chosen by the model (300 m)"]},"s":["JE09","LO23"],"mod":true};
+DATA.p_usine={"c":"#9aa3ad","n":{"fr":"Petite usine","en":"Small factory"},"d":{"fr":"Un bâtiment industriel avec une conduite de rejet vers l'affluent (position et taille choisies par le modèle).","en":"An industrial building with a discharge pipe to the tributary (position and size chosen by the model)."},"m":{"fr":"Un rejet industriel peut apporter de la chaleur ou des métaux. Le modèle propose la chaleur (+6 °C au niveau sévère, choix du modèle) et deux métaux dont la toxicité pour la truite fario est publiée : le zinc et le cadmium, très variables selon la dureté de l'eau. L'effet touche d'abord l'affluent en aval du rejet, puis la rivière en aval de la confluence ; l'amont sert de référence. Les autres métaux ne sont pas proposés faute de données suffisantes.","en":"An industrial discharge can bring heat or metals. The model offers heat (+6 °C at the severe level, model choice) and two metals whose toxicity to brown trout is published: zinc and cadmium, which vary strongly with water hardness. The effect hits the tributary first downstream of the discharge, then the river downstream of the confluence; the upstream reach is the reference. Other metals are not offered for lack of sufficient data."},"f":{"fr":["Pression : rejet industriel (chaleur, zinc ou cadmium)","Toxicité du cadmium et du zinc : plus forte en eau douce (peu dure)","Amont du rejet : référence ; aval : ruisseau, puis rivière","Effet atténué vers l'aval : portée choisie par le modèle (300 m à 1 000 m)"],"en":["Pressure: industrial discharge (heat, zinc or cadmium)","Cadmium and zinc toxicity: higher in soft water","Upstream of discharge: reference; downstream: stream, then river","Effect fades downstream: range chosen by the model (300 m to 1,000 m)"]},"s":["KA03","BH07"],"mod":true};
 const PRMAT={};
 function rvPMat(h,rough){const k=h+"_"+(rough||0.92);return PRMAT[k]||(PRMAT[k]=new THREE.MeshStandardMaterial({color:h,roughness:rough||0.92,metalness:0}));}
 function rvPBox(g,w,h,d,x,y,z,hex){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),rvPMat(hex));m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;g.add(m);return m;}
@@ -3188,6 +3308,7 @@ function rvAffDry(o,on){                               // couche affichee : refl
 }
 MODS.find(m=>m.id==="affluents").toggle=function(on){if(this.obj)rvAffDry(this.obj,on);};   // appele par la case de la couche "Affluents"
 /* ===== FIN BLOC PRESSION ===== */
+/* ##### GROUPE : Especes et moteur de population (donnees, milieu, fario, survie, peche, deversement, communaute) ##### */
 /* ===== BLOC ESPECES ===== */
 /* PARAMETRES DES ESPECES. Donnees pures : aucun calcul ici (les moteurs sont dans les blocs MILIEU, FARIO, PECHE et COMMUNAUTE).
    Chaque valeur = {v, s, r, pl} : v valeur ; s statut "V" lu dans la source, "O" ordre de grandeur indirect, "M" parametre du MODELE non verifie ;
@@ -3270,50 +3391,14 @@ function rvSpStats(){                            // compte les parametres par st
   return c;
 }
 (function(){const c=rvSpStats();console.info("[especes] "+Object.keys(RVSP.sp).length+" especes, parametres : V="+c.V+" O="+c.O+" M="+c.M+" (a verifier si M)");})();
-DATA.sp_fario={c:"#e0a96d",n:{fr:"Truite fario",en:"Brown trout"},
-  d:{fr:"Salmonidé de rivière fraîche, espèce centrale du modèle. Elle pond en hiver dans des graviers propres, au courant vif et peu profond ; juvéniles et adultes n'ont pas les mêmes besoins d'habitat.",
-     en:"Salmonid of cool streams, the central species of the model. It spawns in winter on clean gravel in shallow, fast water; juveniles and adults have different habitat needs."},
-  m:{fr:"Le modèle suit quatre stades : œufs et alevins, juvéniles de l'année (0+), juvéniles de 1 an (1+) et adultes. La croissance s'arrête vers 19,5 °C et la limite létale à 7 jours est d'environ 25 °C. La régulation des juvéniles par la densité est débattue : le modèle la module par le débit d'étiage. Survies et capacités d'accueil sont des ordres de grandeur du modèle.",
-     en:"The model follows four stages: eggs and alevins, young of the year (0+), yearlings (1+) and adults. Growth stops around 19.5 °C and the 7-day lethal limit is about 25 °C. Whether juveniles are regulated by density is debated: the model modulates it by low-flow discharge. Survival rates and carrying capacities are model orders of magnitude."},
-  f:{fr:["Croissance : 3,5 à 19,5 °C, maximum vers 13 °C (fourchette)","Létal à 7 jours : environ 25 °C","Fécondité : environ 2 000 œufs/kg (ordre de grandeur ; 1 500 à 4 000)","Ponte : novembre à février (ordre de grandeur)","Incubation : environ 400 degrés-jours (ordre de grandeur)","Survies et densités : ordre de grandeur du modèle"],
-     en:["Growth: 3.5 to 19.5 °C, maximum near 13 °C (range)","Lethal at 7 days: about 25 °C","Fecundity: about 2,000 eggs/kg (order of magnitude; 1,500 to 4,000)","Spawning: November to February (order of magnitude)","Incubation: about 400 degree-days (order of magnitude)","Survival and densities: model order of magnitude"]}};
-DATA.sp_arc={c:"#d46a8a",n:{fr:"Truite arc-en-ciel",en:"Rainbow trout"},
-  d:{fr:"Salmonidé d'Amérique du Nord, introduit en Europe vers 1880. Dans nos rivières, il est surtout présent parce qu'on le déverse pour la pêche, en taille portion, juste avant l'ouverture. Les poissons déversés sont en général triploïdes, donc stériles, d'après plusieurs fédérations ; des populations qui se reproduisent seules existent, mais restent rares.",
-     en:"Salmonid from North America, introduced to Europe around 1880. In our rivers it is mostly present because it is stocked for angling as catchable-size fish just before the season opens. Stocked fish are generally sterile triploids according to several federations; self-sustaining populations exist but remain rare."},
-  m:{fr:"Le modèle suit les portions déversées à part des poissons sauvages. Elles agissent sur la truite fario de deux façons, toutes deux des hypothèses du modèle : elles détournent une partie de la pêche (avec un nombre de pêcheurs inchangé, choix de l'auteur) et elles concurrencent faiblement les juvéniles de truite fario. Dans le modèle, l'effet est positif sous forte pression de pêche et quasi nul sans pêche, car les portions disparaissent en quelques semaines. Ce résultat n'est pas démontré : les études disponibles sont partagées. Limite létale d'environ 24 °C (une étude) et seuil de stress de 20 °C (ordre de grandeur).",
-     en:"The model follows stocked fish separately from wild fish. They act on brown trout in two ways, both model assumptions: they divert part of the angling effort (with an unchanged number of anglers, the author's choice) and they weakly compete with juvenile brown trout. In the model the net effect is positive under heavy fishing pressure and almost nil without fishing, because stocked fish disappear within a few weeks. This result is not demonstrated: the available studies disagree. Lethal limit about 24 °C (one study) and stress threshold 20 °C (order of magnitude)."},
-  f:{fr:["Présente surtout par déversement (taille portion)","Déversée avant l'ouverture (2e samedi de mars)","Ponte : février à mai (rare chez nous)","Effet sur la truite fario : détournement de la pêche et concurrence faible (hypothèses du modèle)","Déversée en général stérile (triploïde) : pas de reproduction ni d'hybridation avec la truite fario (selon des fédérations)","Résultat non démontré : études partagées","Limite létale : environ 24 °C ; stress : 20 °C"],
-     en:["Present mostly through stocking (catchable size)","Stocked before the season opens (second Saturday of March)","Spawning: February to May (rare here)","Effect on brown trout: diversion of angling and weak competition (model assumptions)","Usually stocked as sterile triploids: no breeding and no hybridisation with brown trout (according to federations)","Result not demonstrated: studies disagree","Lethal limit: about 24 °C; stress: 20 °C"]}};
-DATA.sp_chabot={c:"#8a6f4d",n:{fr:"Chabot",en:"Bullhead"},
-  d:{fr:"Petit poisson de fond (10 à 15 cm), territorial et sédentaire, qui vit sous les pierres des eaux fraîches. Une seule ponte par an, de février à juin ; le mâle garde les œufs environ trois semaines.",
-     en:"Small bottom-dwelling fish (10 to 15 cm), territorial and sedentary, living under stones in cool water. One spawning a year, February to June; the male guards the eggs for about three weeks."},
-  m:{fr:"Très sensible au colmatage : il lui faut un fond grossier et ouvert avec des caches. La chaleur raccourcit sa vie (environ 7 ans en site froid, 4 à 5 ans en site chaud) et réduit sa fécondité. Seuil létal, nombre d'œufs et survies non trouvés : valeurs du modèle.",
-     en:"Very sensitive to clogging: it needs a coarse, open bed with hiding places. Warmth shortens its life (about 7 years in cold sites, 4 to 5 in warm ones) and lowers fecundity. Lethal limit, egg number and survival not found: model values."},
-  f:{fr:["Taille : 10 à 15 cm","Vie : 4 à 7 ans selon la température","Maturité : 1+ à 3+ selon la température","Ponte : février à juin, une par an","Habitat : galets et graviers grossiers, caches","Seuils et fécondité : ordre de grandeur du modèle"],
-     en:["Size: 10 to 15 cm","Lifespan: 4 to 7 years depending on temperature","Maturity: 1+ to 3+ depending on temperature","Spawning: February to June, once a year","Habitat: cobbles and coarse gravel, hiding places","Limits and fecundity: model order of magnitude"]}};
-DATA.sp_vairon={c:"#7fb3c8",n:{fr:"Vairon",en:"Minnow"},
-  d:{fr:"Petit cyprinidé grégaire de 2 à 10 cm des eaux claires, fraîches et bien oxygénées. Il pond en plusieurs fois en eau peu profonde sur des graviers, où les œufs adhèrent. Proie de choix pour la truite.",
-     en:"Small schooling cyprinid, 2 to 10 cm, of clear, cool, well-oxygenated water. It spawns in several batches in shallow water over gravel, where the eggs stick. A favourite prey of trout."},
-  m:{fr:"Sources faibles : vie de 3 à 6 ans et maturité à 2-3 ans (ordre de grandeur). Température, fécondité, survies et période de ponte précise non trouvées : valeurs du modèle. La prédation par la truite fario est désactivée par défaut.",
-     en:"Weak sources: lifespan 3 to 6 years and maturity at 2-3 years (order of magnitude). Temperature, fecundity, survival and exact spawning period not found: model values. Brown trout predation is off by default."},
-  f:{fr:["Taille : 2 à 10 cm (ordre de grandeur)","Vie : 3 à 6 ans (ordre de grandeur)","Ponte fractionnée sur graviers peu profonds","Incubation : 4 à 7 jours (ordre de grandeur)","Température et fécondité : ordre de grandeur du modèle"],
-     en:["Size: 2 to 10 cm (order of magnitude)","Lifespan: 3 to 6 years (order of magnitude)","Batch spawning on shallow gravel","Incubation: 4 to 7 days (order of magnitude)","Temperature and fecundity: model order of magnitude"]}};
+DATA.sp_fario={"c":"#e0a96d","n":{"fr":"Truite fario","en":"Brown trout"},"d":{"fr":"Salmonidé de rivière fraîche, espèce centrale du modèle. Elle pond en hiver dans des graviers propres, au courant vif et peu profond ; juvéniles et adultes n'ont pas les mêmes besoins d'habitat.","en":"Salmonid of cool streams, the central species of the model. It spawns in winter on clean gravel in shallow, fast water; juveniles and adults have different habitat needs."},"m":{"fr":"Le modèle suit quatre stades : œufs et alevins, juvéniles de l'année (0+), juvéniles de 1 an (1+) et adultes. La croissance s'arrête vers 19,5 °C et la limite létale à 7 jours est d'environ 25 °C. Sur le Scorff (Bretagne), la survie était de 5 % la première année et d'environ 40 % les deuxième et troisième années. La régulation des juvéniles par la densité est débattue : le modèle la module par le débit d'étiage. Les capacités d'accueil sont des choix du modèle.","en":"The model follows four stages: eggs and fry, young of the year (0+), 1-year juveniles (1+) and adults. Growth stops around 19.5 °C and the 7-day lethal limit is about 25 °C. In the Scorff (Brittany), survival was 5% in the first year and about 40% in the second and third years. Density regulation of juveniles is debated: the model modulates it by low-flow discharge. Carrying capacities are model choices."},"f":{"fr":["Croissance : 3,5 à 19,5 °C, maximum vers 13 °C","Létal à 7 jours : environ 25 °C","Fécondité : environ 2 000 œufs/kg (1 000 à 4 000 selon les fiches des fédérations)","Ponte : novembre à janvier ; incubation : environ 400 degrés-jours (40 jours à 10 °C)","Survie (Scorff) : 5 % la 1re année, environ 40 % ensuite","Capacités et survies utilisées par le modèle : choix du modèle"],"en":["Growth: 3.5 to 19.5 °C, maximum around 13 °C","Lethal at 7 days: about 25 °C","Fecundity: about 2,000 eggs/kg (1,000 to 4,000 depending on federation sheets)","Spawning: November to January; incubation: about 400 degree-days (40 days at 10 °C)","Survival (Scorff): 5% in year 1, about 40% afterwards","Capacities and survivals used by the model: model choices"]},"s":["EA","EH98","BM02","GARD","ALLIER"],"mod":true};
+DATA.sp_arc={"c":"#d46a8a","n":{"fr":"Truite arc-en-ciel","en":"Rainbow trout"},"d":{"fr":"Salmonidé d'Amérique du Nord, introduit en France à partir de 1879. Dans nos rivières, il est surtout présent parce qu'on le déverse pour la pêche, en taille portion, juste avant l'ouverture. Les poissons déversés sont en général stériles (triploïdes) d'après plusieurs fédérations ; la reproduction naturelle est très rare en France.","en":"North American salmonid, introduced in France from 1879. In our rivers it is mostly present because it is stocked for angling, at portion size, just before the season opens. Stocked fish are generally sterile (triploid) according to several federations; natural reproduction is very rare in France."},"m":{"fr":"Le modèle suit les portions déversées à part des poissons sauvages. Elles agissent sur la truite fario de deux façons, toutes deux des hypothèses du modèle : elles détournent une partie de la pêche (avec un nombre de pêcheurs inchangé, choix de l'auteur) et elles concurrencent faiblement les juvéniles. Dans le modèle, l'effet est positif sous forte pression de pêche et quasi nul sans pêche, car les portions disparaissent en quelques semaines (90 % en moins de 15 jours dans le Rhône). Ce résultat n'est pas démontré : les études disponibles sont partagées.","en":"The model follows stocked portion-size fish separately from wild fish. They act on brown trout in two ways, both model hypotheses: they divert part of the angling (with an unchanged number of anglers, author's choice) and they weakly compete with juveniles. In the model, the effect is positive under heavy fishing pressure and almost nil without fishing, because portions vanish within weeks (90% in under 15 days in the Rhône). This result is not demonstrated: available studies are divided."},"f":{"fr":["Présente surtout par déversement (taille portion)","Déversée avant l'ouverture (en général le 2e samedi de mars en 1re catégorie)","Ponte surtout printanière dans l'aire d'origine (souches d'élevage : autres saisons) ; très rare en France","Déversée en général stérile (triploïde) : pas de reproduction ni d'hybridation avec la truite fario (selon des fédérations)","Effet sur la truite fario : détournement de la pêche et concurrence faible (hypothèses du modèle)","Résultat non démontré : études partagées"],"en":["Mostly present through stocking (portion size)","Stocked before opening (generally the 2nd Saturday of March in category 1 waters)","Spawning mostly in spring in the native range (hatchery strains: other seasons); very rare in France","Stocked fish generally sterile (triploid): no reproduction or hybridisation with brown trout (according to federations)","Effect on brown trout: angling diversion and weak competition (model hypotheses)","Result not demonstrated: studies divided"]},"s":["DORISAEC","BO11","FD21","R436","RHONE","PERCHE"],"mod":true};
+DATA.sp_chabot={"c":"#8a6f4d","n":{"fr":"Chabot","en":"Bullhead"},"d":{"fr":"Petit poisson de fond (10 à 15 cm), territorial et sédentaire, qui vit sous les pierres des eaux fraîches. Une seule ponte par an, de février à juin ; le mâle garde les œufs environ trois semaines.","en":"Small bottom-dwelling fish (10 to 15 cm), territorial and sedentary, living under stones in cool water. One spawning a year, February to June; the male guards the eggs for about three weeks."},"m":{"fr":"Très sensible au colmatage : il lui faut un fond grossier et ouvert avec des caches. La chaleur raccourcit sa vie (environ 7 ans en site froid, 4 à 5 ans en site chaud) et réduit sa fécondité. Une femelle pond 69 à 896 œufs selon la taille. Le seuil de stress thermique et les survies ne sont pas publiés : ce sont des choix du modèle.","en":"Very sensitive to clogging: it needs a coarse, open bed with hiding places. Heat shortens its life (about 7 years at cold sites, 4 to 5 at warm sites) and reduces fecundity. A female lays 69 to 896 eggs depending on size. The thermal stress threshold and survivals are not published: they are model choices."},"f":{"fr":["Taille : 10 à 15 cm","Vie : 4 à 7 ans selon la température","Maturité : 1+ à 3+ selon la température","Ponte : février à juin, une par an ; mâle gardien des œufs","Habitat : galets et graviers grossiers, caches","Seuil de stress et survies : choix du modèle"],"en":["Size: 10 to 15 cm","Lifespan: 4 to 7 years depending on temperature","Maturity: 1+ to 3+ depending on temperature","Spawning: February to June, once a year; male guards the eggs","Habitat: cobbles and coarse gravel, hiding places","Stress threshold and survivals: model choices"]},"s":["N2000CHA","AB05","RE09"],"mod":true};
+DATA.sp_vairon={"c":"#7fb3c8","n":{"fr":"Vairon","en":"Minnow"},"d":{"fr":"Petit cyprinidé grégaire de 4 à 10 cm (maximum 14 cm) des eaux claires, fraîches et bien oxygénées de la zone à truite. Il pond en juin-juillet, en plusieurs fois, en eau peu profonde sur des graviers, où les œufs adhèrent. Proie de choix pour la truite.","en":"Small gregarious cyprinid of 4 to 10 cm (maximum 14 cm) living in clear, cool, well-oxygenated waters of the trout zone. It spawns in June-July, in several batches, in shallow water over gravel where the eggs stick. A favourite prey of trout."},"m":{"fr":"Une femelle pond 200 à 1 000 œufs selon sa taille (jusqu'à 3 000 selon d'autres fiches). Les fiches indiquent 3 à 6 ans de vie. Le seuil de température, les survies et la période de ponte précise du modèle sont des choix du modèle. La prédation par la truite fario est désactivée par défaut.","en":"A female lays 200 to 1,000 eggs depending on size (up to 3,000 in other sheets). Sheets give a lifespan of 3 to 6 years. The model's temperature threshold, survivals and precise spawning period are model choices. Predation by brown trout is off by default."},"f":{"fr":["Taille : 4 à 10 cm (maximum 14 cm)","Vie : 3 à 6 ans selon les fiches","Ponte fractionnée en juin-juillet sur graviers peu profonds","Fécondité : 200 à 1 000 œufs par femelle","Température, survies : choix du modèle"],"en":["Size: 4 to 10 cm (maximum 14 cm)","Lifespan: 3 to 6 years depending on sheets","Batch spawning in June-July on shallow gravel","Fecundity: 200 to 1,000 eggs per female","Temperature, survivals: model choices"]},"s":["DORISVAI","OPSVAI"],"mod":true};
 /* ===== BLOC CYP2 : fiche, bouton, ligne du tableau Populations et textes du chevesne (Sources_Riviere AG) ===== */
-DATA.sp_chevesne={c:"#9aa65a",n:{fr:"Chevesne",en:"Chub"},
-  d:{fr:"Cyprinidé généraliste de 30 à 50 cm, présent de la zone à truite à la zone à brème, avec un préférendum en zone à barbeau. Il remonte vers l'amont quand l'eau se réchauffe.",
-     en:"Generalist cyprinid of 30 to 50 cm, found from the trout zone to the bream zone, with a preference for the barbel zone. It moves upstream as the water warms."},
-  m:{fr:"Dans le modèle, il ne se reproduit pas tant que l'eau de printemps est trop froide (seuil placé à 12 ± 2 °C : la ponte demande une moyenne mensuelle supérieure à 12 °C). Il arrive de l'aval si la rivière est ouverte et remonte de proche en proche. Il réduit un peu la survie des jeunes truites (coefficient 0,15, sans source) : c'est surtout un indicateur du glissement de zone, pas un concurrent démontré. Survies, capacité des juvéniles et habitat : valeurs du modèle.",
-     en:"In the model it does not breed while spring water is too cold (threshold set at 12 ± 2 °C: spawning needs a monthly mean above 12 °C). It arrives from downstream if the river is open and moves up step by step. It slightly reduces the survival of young brown trout (coefficient 0.15, no source): it is mostly an indicator of zone shift, not a proven competitor. Survival, juvenile capacity and habitat: model values."},
-  f:{fr:["Taille : 30 à 50 cm (jusqu'à 65 cm)","Vie : 9 ans (mâles) à 13 ans et plus (femelles)","Maturité : 2 ans (mâles), 3 ans (femelles)","Ponte : mi-avril à mi-juin, eau au-dessus de 15 °C","Fécondité : environ 57 000 œufs par kg","Tolère plus de 30 °C et moins de 6 mg/L d'oxygène","Survies, capacité et habitat : ordre de grandeur du modèle"],
-     en:["Size: 30 to 50 cm (up to 65 cm)","Lifespan: 9 years (males) to 13 years or more (females)","Maturity: 2 years (males), 3 years (females)","Spawning: mid-April to mid-June, water above 15 °C","Fecundity: about 57,000 eggs per kg","Tolerates over 30 °C and under 6 mg/L oxygen","Survival, capacity and habitat: model order of magnitude"]}};
+DATA.sp_chevesne={"c":"#9aa65a","n":{"fr":"Chevesne","en":"Chub"},"d":{"fr":"Cyprinidé généraliste de 30 à 50 cm, présent de la zone à truite à la zone à brème, avec un préférendum en zone à barbeau. Les modèles de distribution annoncent qu'il gagne des sites en amont quand l'eau se réchauffe.","en":"Generalist cyprinid of 30 to 50 cm, found from the trout zone to the bream zone, with a preference for the barbel zone. Distribution models predict it gains upstream sites as water warms."},"m":{"fr":"Dans le modèle, il ne se reproduit pas tant que l'eau de printemps est trop froide (seuil placé à 12 ± 2 °C : la ponte demande une moyenne mensuelle supérieure à 12 °C). Il arrive de l'aval si la rivière est ouverte et remonte de proche en proche ; en France, les aires de 32 espèces de poissons ont reculé en moyenne de 0,6 km vers l'amont par décennie. Il réduit un peu la survie des jeunes truites (coefficient 0,15, choix du modèle sans source) : c'est surtout un indicateur du glissement de zone, pas un concurrent démontré.","en":"In the model, it does not breed while spring water is too cold (threshold set at 12 ± 2 °C: spawning requires a monthly mean above 12 °C). It arrives from downstream if the river is open and moves up step by step; across France, the ranges of 32 fish species moved on average 0.6 km upstream per decade. It slightly reduces young trout survival (coefficient 0.15, model choice without source): it is mainly an indicator of zone shift, not a demonstrated competitor."},"f":{"fr":["Taille : 30 à 50 cm (jusqu'à 65 cm)","Vie : 9 ans (mâles) à 13 ans et plus (femelles)","Maturité : 2 ans (mâles), 3 ans (femelles)","Ponte : mi-avril à mi-juin, eau au-dessus de 15 °C","Fécondité : environ 57 000 œufs par kg","Tolère plus de 30 °C et moins de 6 mg/L d'oxygène","Survies, capacité et habitat : ordre de grandeur du modèle"],"en":["Size: 30 to 50 cm (up to 65 cm)","Lifespan: 9 years (males) to 13 years or more (females)","Maturity: 2 years (males), 3 years (females)","Spawning: mid-April to mid-June, water above 15 °C","Fecundity: about 57,000 eggs per kg","Tolerates over 30 °C and under 6 mg/L oxygen","Survival, capacity and habitat: model order of magnitude"]},"s":["KE20","CG13"],"mod":true};
 /* ===== FIN BLOC CYP2 ===== */
-DATA.sp_ecrevisse={c:"#c0442f",n:{fr:"Écrevisse signal",en:"Signal crayfish"},
-  d:{fr:"Écrevisse d'origine nord-américaine, introduite en Europe. Elle gagne du terrain dans les rivières, surtout vers l'aval.",
-     en:"Crayfish of North American origin, introduced to Europe. It spreads through rivers, mostly downstream."},
-  m:{fr:"Dans des ruisseaux de Grande-Bretagne, sa densité est liée à moins de chabots et moins de truites de l'année ; le chabot a disparu de deux ruisseaux après l'invasion. Pour les œufs de salmonidés enfouis, les preuves restent partagées. Les effets du modèle sont des ordres de grandeur.",
-     en:"In British streams, its density goes with fewer bullheads and fewer young-of-year trout; bullhead disappeared from two streams after invasion. For buried salmonid eggs the evidence is mixed. Model effects are orders of magnitude."},
-  f:{fr:["Progression : jusqu'à 2,4 km par an, environ dix fois moins au début","Surtout vers l'aval","Effet fort sur le chabot, modéré sur la truite de l'année (modèle)","Absente par défaut (case « introduite »)"],
-     en:["Spread: up to 2.4 km per year, about ten times less at first","Mostly downstream","Strong effect on bullhead, moderate on young-of-year trout (model)","Absent by default ('introduced' box)"]}};
+DATA.sp_ecrevisse={"c":"#c0442f","n":{"fr":"Écrevisse signal","en":"Signal crayfish"},"d":{"fr":"Écrevisse d'origine nord-américaine, introduite en Europe. Elle gagne du terrain dans les rivières, surtout vers l'aval.","en":"Crayfish of North American origin, introduced to Europe. It spreads through rivers, mostly downstream."},"m":{"fr":"Dans des ruisseaux de Grande-Bretagne, sa densité est liée à moins de chabots et moins de truites de l'année ; le chabot a disparu de deux ruisseaux après l'invasion. Pour les œufs de salmonidés enfouis, les preuves restent partagées. Les coefficients d'effet du modèle sont des choix du modèle.","en":"In British streams, its density is linked to fewer bullheads and fewer young-of-the-year trout; the bullhead disappeared from two streams after the invasion. For buried salmonid eggs, the evidence remains divided. The model's effect coefficients are model choices."},"f":{"fr":["Progression : jusqu'à 2,4 km par an, environ dix fois moins au début","Surtout vers l'aval","Effet fort sur le chabot, modéré sur la truite de l'année (modèle)","Absente par défaut (case « introduite »)"],"en":["Spread: up to 2.4 km per year, about ten times less at first","Mostly downstream","Strong effect on bullhead, moderate on young-of-year trout (model)","Absent by default ('introduced' box)"]},"s":["FI13","BU05"],"mod":true};
 /* ===== FIN BLOC ESPECES ===== */
 /* ===== BLOC MILIEU ===== */
 /* MILIEU DU MOTEUR DE POPULATION. Calcul PUR : rien dans l'eau, aucun affichage.
@@ -3900,6 +3985,7 @@ RVPOP.cmpExch=function(o){o=Object.assign({n:10,ans:50,dT:0},o||{});RVENV.ensure
   console.table(out);return out;};
 /* ===== FIN BLOC IMMI1 ===== */
 /* ===== FIN BLOC COMMUNAUTE ===== */
+/* ##### GROUPE : Panneau Populations et carte d'habitat ##### */
 /* ===== BLOC POPULATIONS ===== */
 /* Panneau "Populations" (barre laterale droite) : la chaine peche -> deversement -> population de fario sauvage devient VISIBLE.
    - Deux scenarios calcules ENSEMBLE, avec les memes graines (memes debits et crues) : A = sans lacher ; B = avec lacher (case Deversement cochee).
@@ -3926,7 +4012,7 @@ function rvSideRun(dev){                                 // un scenario : RVUI.n
     const R=rvHalOpt(o,()=>rvComRun(env,o));if(R&&R.res[0].eteint)ext++;}
   const d=U.n*ny,out={ext:ext,n:U.n,sc:{},ser:{},reach:{}};
   for(const k in sc)out.sc[k]=sc[k]/d;
-  RVUI_ST.forEach(s=>{const k=s[0];out.ser[k]={m:[],lo:[],hi:[]};
+  RVUI_ST.forEach(s=>{const k=s[0];out.ser[k]={m:[],lo:[],hi:[],ps:ser[k]};
     ser[k].forEach(v=>{let a=0,lo=1e99,hi=-1;v.forEach(x=>{a+=x;if(x<lo)lo=x;if(x>hi)hi=x;});out.ser[k].m.push(a/v.length);out.ser[k].lo.push(lo);out.ser[k].hi.push(hi);});
     out.reach[k]=Array.from(reach[k],x=>x/d/(RVENG.tronc/100));});   // individus / 100 m dans chaque troncon (fin d'annee, moyenne des dernieres annees)
   return out;
@@ -4071,6 +4157,7 @@ function rvMapTip(ev){                                   // survol de la bande :
   tip.textContent=s;
 }
 /* ===== FIN BLOC CARTE HABITAT ===== */
+/* ##### GROUPE : Habitat : bois mort, abris, blocs, herbiers, ripisylve, contexte thermique, presets ##### */
 /* ===== BLOC BOISMORT2 ===== */
 /* Curseurs "Bois mort" (Effets) : quantite (x BMC.mult, defaut 1,8 depuis HABITAT2) et part des mouilles qui recoivent du bois (BMC.pool, defaut 70 %).
    Un changement reconstruit le bois mort et la carte d'habitat (qui en depend) apres 350 ms ; 0 = aucun bois mort. Meme graine = meme tirage a reglages egaux ; "autre riviere" = autre tirage.
@@ -4252,6 +4339,7 @@ const RVCTXS={froid:-2.0,pied:0,chaud:2.3};
 {const b=document.getElementById("bPressInfo"),u=document.getElementById("pressInfo");
  if(b&&u)b.onclick=()=>{u.style.display=u.style.display==="block"?"none":"block";};}
 /* ===== FIN BLOC INFOPRESS1 ===== */
+/* ##### GROUPE : Panneau Populations : sante du modele, pressions, amont / aval ##### */
 /* ===== BLOC SANTE ===== */
 /* SANTE1 : RVPOP.sante({n:6,ans:50,dT:0}) = bilan de la riviere AFFICHEE (console, lecture seule, ne change aucun reglage ni aucun resultat du moteur).
    Donne : surface utile par stade (% de la surface mouillee, moyenne des 4 saisons), indice de refuge R (survie liee a l'habitat), parts de l'abri (bois / blocs / herbiers / autres),
@@ -4334,6 +4422,7 @@ function rvDrawSer(cv,k,A,B,hv){                          // une courbe par stad
     for(let i=d.lo.length-1;i>=0;i--)g.lineTo(X(i),Y(d.lo[i]));
     g.closePath();g.fill();g.globalAlpha=1;
     g.strokeStyle=s[1];g.lineWidth=2*dpr;g.beginPath();d.m.forEach((v,i)=>g[i?"lineTo":"moveTo"](X(i),Y(v)));g.stroke();});
+  rvYrCurve(g,X,Y,T,ph,dpr,k,A,B);   // POPFISH2
   rvPressBar(g,X,T,ph,dpr);
   if(hv!=null)rvHoverMark(g,X(hv),T,ph,dpr,S.map(s=>[Y(s[0].ser[k].m[hv]),s[1]]));
   rvTipSet(cv,{n:RVUI.ans,L:L/dpr,pw:pw/dpr,draw:h=>rvDrawSer(cv,k,A,B,h),ser:S.map((s,j)=>({c:s[1],lab:t(j?"popB":"popA"),m:s[0].ser[k].m,lo:s[0].ser[k].lo,hi:s[0].ser[k].hi}))});}
@@ -4362,6 +4451,7 @@ $("ckPrLoc").onchange=e=>{RVPRESS.local=e.target.checked;rvPressChanged();};
 /* PRESS5 : (1) section "Amont / aval de l'affluent" placee EN HAUT des courbes du panneau (juste sous les curseurs, dont la temperature) ; les 4 courbes du troncon entier viennent ensuite sous le titre "Tout le troncon (amont + aval)" quand une pression est choisie ;
    (2) la bulle du menu Pressions explique aussi la ponte quand la case est decochee (ponte globale) ; info-bulle au survol de la case. */
 /* ===== FIN BLOC PRESS5 ===== */
+/* ##### GROUPE : Menus : titres et assemblage de la barre de gauche ##### */
 /* ===== BLOC TITRES1 : titres explicites du panneau Populations ===== */
 /* Les 4 courbes (oeufs, 0+, 1+, adultes) comptent TOUTE la riviere etudiee (xMax = 300 m de part et d'autre, soit environ 600 m, tous les troncons ensemble) ; avec une pression, la section Amont / aval vient AU-DESSUS. Le tableau donne la moyenne des 20 dernieres annees sur n simulations. */
 function rvTronconHead(){const box=$("rvCh"),AB=RVUI.res&&RVUI.res.AB,R=RVPRESS;if(!box)return;
@@ -4449,6 +4539,7 @@ function rvEspUI(){const bx=$("espBtns"),ck=$("espCk");if(!bx||!ck)return;bx.inn
   sv.after(lb);const ck=document.getElementById("ckAbri");ck.checked=!!RVSP.on.abri;
   ck.onchange=e=>{RVSP.on.abri=e.target.checked;rvSideShow();};}}
 /* ===== FIN BLOC ABRI3 ===== */
+/* ##### GROUPE : Poissons 3D (module FISH3D, identique a Fish3D.html) ##### */
 /* ===== BLOC FISH3D ===== */
 /* Étape 1 : données (SPECIES) + interface. Les maillages arrivent à l’étape 2.
    Statuts : V vérifié, O ordre de grandeur (source secondaire), M choix du modèle. Les couleurs (col) sont [M]. */
@@ -5232,7 +5323,6 @@ return F;})();
 
 /* ===== BLOC FISH1 (poissons 3D : ESSAI, quelques poissons poses a la main ; la population reelle viendra ensuite) ===== */
 const RVFI={on:true,ready:false,vis:null};
-Object.assign(I18N,{fishCk:{fr:"Poissons 3D (population simulée, curseur d'année)",en:"3D fish (simulated population, year slider)"}});
 const RVFI_CB={
   bedY:(x,z)=>{const H=HY;let m=rvMeshH(H,x,z);for(let k=0;k<4;k++){const a=k*1.571+0.4,h=rvMeshH(H,x+Math.cos(a)*0.2,z+Math.sin(a)*0.2);if(h>m)m=h;}{const ob=rvObjH(H,x,z);if(ob>m)m=Math.min(ob,m+0.2);}return m+0.03;},
   bedLow:(x,z)=>{const b=rvMeshH(HY,x,z),ob=rvObjH(HY,x,z);return (ob>b?Math.min(ob,b+0.35):b)+0.01;},
@@ -5281,6 +5371,7 @@ function rvFishLinear(){
     if(g&&g.attributes&&g.attributes.color&&!g.userData.rvLin){const a=g.attributes.color.array;for(let i=0;i<a.length;i++)a[i]=Math.pow(a[i],2.2);g.attributes.color.needsUpdate=true;g.userData.rvLin=true;}});
 }
 /* ===== FIN BLOC FISH5 ===== */
+/* ##### GROUPE : Poissons = individus de la population simulee ##### */
 /* ===== BLOC POPFISH1 : poissons = individus de la population simulee + curseur d'annee ===== */
 /* 1 poisson dessine = 1 individu. Une trajectoire simulee (RVYR.seed ; reglages du panneau Populations : peche, deversement, ecrevisse, predation, rechauffement, pression) est relevee
    annee par annee et par troncon de 25 m SANS modifier le moteur (crochet onYear). Changer l'annee ne relance aucun calcul : la liste des poissons est refaite (ids stables : ceux qui restent ne bougent pas,
@@ -5288,20 +5379,18 @@ function rvFishLinear(){
    suit la camera. Bancs (vairon adulte et 0+, chevesne 0+) : un troncon est coupe en bancs de RVYR_BANC[cle] = [min, max] individus [M, NON SOURCE]. Positions ILLUSTRATIVES [M] : hasard a graine fixe dans
    le troncon, favorisant l'habitat du stade (rvSuit). Oeufs jamais dessines. Effectifs : fin d'annee (fario, chabot, vairon, chevesne) ; arc-en-ciel : portions presentes juste apres le lacher de printemps ;
    ecrevisse : SIGNAL du front (3 par troncon atteint, 1 si le front arrive), pas un effectif du moteur [M]. */
-const RVYR={year:25,seed:1,cap:1500,rad:62,series:null,cur:"",built:"",t0:0,lastEnv:null,envV:0,hyRef:null,shown:-1,place:new Map(),used:[],play:false,acc:0,speed:1.2,lang:"fr",cam:null,ref:null,tRef:0,nDraw:0};
+const RVYR={year:25,seed:1,cap:1500,rad:62,series:null,cur:"",built:"",t0:0,lastEnv:null,envV:0,hyRef:null,shown:-1,place:new Map(),used:[],play:false,acc:0,speed:1.2,lang:"fr",cam:null,ref:null,tRef:0,nDraw:0,fold:false};
 const RVYR_G=[["fario","ad"],["arc","portion"],["chabot","ad"],["vairon","ad"],["chevesne","ad"],["ecrevisse","ad"],["fario","j1"],["fario","j0"],["chabot","j0"],["vairon","j0"],["chevesne","j0"]];   // ordre d'affichage
 const RVYR_HOME={"fario.j0":0.6,"fario.j1":1.0,"fario.ad":1.2,"arc.portion":1,"chabot.j0":0.4,"chabot.ad":0.4,"vairon.j0":1,"vairon.ad":1,"chevesne.j0":1,"chevesne.ad":1,"ecrevisse.ad":0.8};
 const RVYR_BANC={"vairon.ad":[10,30],"vairon.j0":[15,40],"chevesne.j0":[10,30]};   // taille d'un banc [min, max] : choix du modele [M], a remplacer par une valeur sourcee
 const RVYR_NOM={"fario.j0":{fr:"fario 0+",en:"brown trout 0+"},"fario.j1":{fr:"fario 1+",en:"brown trout 1+"},"fario.ad":{fr:"fario adultes",en:"brown trout adults"},"arc.portion":{fr:"arcs-en-ciel",en:"rainbow trout"},
   "chabot.j0":{fr:"chabots 0+",en:"bullhead 0+"},"chabot.ad":{fr:"chabots adultes",en:"bullhead adults"},"vairon.j0":{fr:"vairons 0+",en:"minnow 0+"},"vairon.ad":{fr:"vairons adultes",en:"minnow adults"},
   "chevesne.j0":{fr:"chevesnes 0+",en:"chub 0+"},"chevesne.ad":{fr:"chevesnes adultes",en:"chub adults"},"ecrevisse.ad":{fr:"écrevisses (signal du front)",en:"crayfish (front signal)"}};
-Object.assign(I18N,{yrLab:{fr:"Année simulée",en:"Simulated year"},yrSeed:{fr:"trajectoire simulée n° ",en:"simulated trajectory #"},yrOne:{fr:"Individus cette année : ",en:"Individuals this year: "},
-  yrDraw:{fr:"dessinés à moins de 60 m : ",en:"drawn within 60 m: "},yrOther:{fr:"positions illustratives",en:"illustrative positions"},yrPlay:{fr:"Lecture automatique des années",en:"Play years automatically"}});
 function rvYh(s){let h=2166136261>>>0;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)>>>0;}h^=h>>>15;h=Math.imul(h,2246822519)>>>0;h^=h>>>13;return h>>>0;}
 function rvYu(s){return rvYh(s)/4294967296;}
 function rvYrBuild(){
   const env=RVENV.ensure();if(!env)return null;
-  const nr=env.nr,U=RVUI,Y=[],T=[],a=new Float64Array(nr);let prev=new Float64Array(nr),At=0;
+  const nr=env.nr,U=RVUI,Y=[],T=[],W=[],a=new Float64Array(nr);let prev=new Float64Array(nr),At=0;
   for(let r=0;r<nr;r++){a[r]=env.area(r,1);At+=a[r];}
   const o={peche:RVHAL.on.peche,devers:RVHAL.on.devers,h:U.h,nKm:U.nKm,ecr:RVSP.on.ecr,pred:RVSP.on.pred,ans:U.ans,dTend:U.dT,seed:RVYR.seed,sps:["chabot","vairon","chevesne"],
     onYear:(y,st,rec,row,an,S3,ei)=>{
@@ -5310,11 +5399,11 @@ function rvYrBuild(){
       ["chabot","vairon","chevesne"].forEach(id=>{const s=S3&&S3[id];g[id+".j0"]=s?f(s.j0):Z;g[id+".ad"]=s?f(s.ad):Z;});
       if(RVHAL.on.devers&&st.stk){const S=row.deverses||0;g["arc.portion"]=Array.from(prev,(p,r)=>p+(At>0?S*a[r]/At:0));prev=Float64Array.from(st.stk);}else g["arc.portion"]=Z;
       g["ecrevisse.ad"]=o.ecr&&ei?Array.from(ei,e=>e>0.5?3:(e>0?1:0)):Z;
-      Y[y]=g;const t={};RVYR_G.forEach(q=>{const k=q[0]+"."+q[1];t[k]=g[k].reduce((x,z)=>x+z,0);});T[y]=t;}};
+      Y[y]=g;W[y]={c:rec.crue||"",s:(an&&an.crue)?Object.assign({},an.crue):null,T:rec.Tpic,q:(an&&an.q)?Object.assign({},an.q):null};const t={};RVYR_G.forEach(q=>{const k=q[0]+"."+q[1];t[k]=g[k].reduce((x,z)=>x+z,0);});T[y]=t;}};
   rvHalOpt(o,()=>rvComRun(env,o));
   if(!Y.length)return null;
   const H=HY,C=env.reaches.map(rc=>{const im=Math.round((rc.i0+rc.i1)/2);return {x:H.X[im],z:H.Zc[im],y:H.WL[im]};});
-  return {Y:Y,T:T,C:C,env:env};
+  return {Y:Y,T:T,W:W,C:C,env:env};
 }
 function rvYrHab(sp,st){const S=RVSP.sp,h=sp==="arc"?S.fario.hab.ad:(sp==="ecrevisse"?S.ecrevisse.hab:(S[sp].hab[st]||S[sp].hab.ad));return h||null;}
 function rvYrPush(p){   // meme rappel que l'essai (OBJ3 + OBJ4) : le poisson ne nait pas dans une racine
@@ -5350,30 +5439,66 @@ function rvYrAgents(cp){   // tous les individus de l'annee choisie qui sont a p
 function rvYrTick(dt){
   if(RVYR.lang!==LANG){RVYR.lang=LANG;rvYrTxt();}   /* FR / EN */
   RVENV.ensure();if(RVENV.env!==RVYR.lastEnv){RVYR.lastEnv=RVENV.env;RVYR.envV++;}
-  const now=performance.now(),cur=[rvSideKey(),RVYR.seed,HY.seed,RVYR.envV].join("|");
+  const now=performance.now();const cur=[rvSideKey(),RVYR.seed,HY.seed,RVYR.envV].join("|");
   if(cur!==RVYR.cur){RVYR.cur=cur;RVYR.t0=now;}
   if(cur!==RVYR.built&&(!RVYR.series||now-RVYR.t0>300)){RVYR.series=rvYrBuild();RVYR.built=cur;RVYR.place.clear();RVYR.used.length=0;RVYR.shown=-1;rvYrTxt();}   // 300 ms apres le dernier reglage
   if(RVYR.play&&RVYR.series){RVYR.acc+=dt*RVYR.speed;while(RVYR.acc>=1){RVYR.acc-=1;RVYR.year=RVYR.year>=RVUI.ans?1:RVYR.year+1;}
-    const s=document.getElementById("rvYs");if(s)s.value=RVYR.year;}
+    const s=document.getElementById("rvYs");if(s&&+s.value!==RVYR.year){s.value=RVYR.year;rvYrRedraw();}}
   const cp=RVYR.cam||camera.position;let moved=RVYR.ref===null;
   if(!moved){const dx=cp.x-RVYR.ref.x,dy=cp.y-RVYR.ref.y,dz=cp.z-RVYR.ref.z;moved=dx*dx+dy*dy+dz*dz>16&&now-RVYR.tRef>200;}   // la camera a bouge de plus de 4 m
   if(moved||RVYR.shown!==RVYR.year||RVYR.hyRef!==HY){RVYR.ref={x:cp.x,y:cp.y,z:cp.z};RVYR.tRef=now;RVYR.hyRef=HY;RVYR.shown=RVYR.year;
     const L=rvYrAgents(RVYR.ref);RVYR.nDraw=L.length;FISH3D.setAgents(L);rvFishLinear();rvYrTxt();}
 }
 function rvYrTxt(){
-  const v=document.getElementById("rvYv"),n=document.getElementById("rvYn"),b=document.getElementById("rvYp");if(!v)return;
-  v.textContent=RVYR.year+" / "+RVUI.ans;b.textContent=RVYR.play?"\u23f8":"\u25b6";b.title=t("yrPlay");
-  const S=RVYR.series;if(!S){n.textContent="";return;}
+  const v=document.getElementById("rvYv"),n=document.getElementById("rvYn"),b=document.getElementById("rvYp"),cz=document.getElementById("rvYc");if(!v)return;
+  v.textContent=RVYR.year+" / "+RVUI.ans;b.textContent=RVYR.play?"\u23f8":"\u25b6";b.title=t("yrPlay");const sg=document.getElementById("rvYg");if(sg)sg.title=t("yrTrajT");const ff=document.getElementById("rvYf");if(ff)ff.title=t("yrFold");
+  const S=RVYR.series;if(!S){n.textContent="";if(cz)cz.textContent="";return;}
+  if(cz)cz.innerHTML=rvYrCause(S);
   const T=S.T[Math.max(0,Math.min(S.T.length-1,RVYR.year-1))],l=RVYR_G.filter(q=>T[q[0]+"."+q[1]]>=0.5).map(q=>L(RVYR_NOM[q[0]+"."+q[1]])+" "+Math.round(T[q[0]+"."+q[1]]));
-  n.textContent=t("yrOne")+(l.length?l.join(" \u00b7 "):"0")+" \u2014 "+t("yrDraw")+RVYR.nDraw+" \u00b7 "+t("yrOther")+" \u00b7 "+t("yrSeed")+RVYR.seed;
+  n.textContent=t("yrOne")+(l.length?l.join(" \u00b7 "):"0")+" \u2014 "+t("yrDraw")+RVYR.nDraw+" \u00b7 "+t("yrOther")+"";
 }
+/* ===== BLOC POPFISH2 : trajectoire choisie et annee sur les courbes ===== */
+/* Les courbes du panneau Populations montrent la bande et la moyenne de RVUI.n simulations (graines 1..n). Ici : la simulation dont les poissons suivent l'histoire (RVYR.seed ; A ou B selon le deversement) en trait fin blanc,
+   et une ligne verticale a l'annee du curseur. Rien n'est recalcule : out.ser[k].ps garde les valeurs de chaque graine (ps[annee][graine-1]). */
+function rvYrCurve(g,X,Y,T,ph,dpr,k,A,B){
+  if(!RVFI.on)return;const R=(RVHAL.on.devers&&B)?B:A,ps=R&&R.ser[k]&&R.ser[k].ps;if(!ps)return;
+  g.save();g.strokeStyle="rgba(255,255,255,.95)";g.lineWidth=dpr;g.beginPath();
+  for(let y=0;y<ps.length;y++){const v=ps[y][RVYR.seed-1];if(v==null)continue;g[y?"lineTo":"moveTo"](X(y),Y(v));}g.stroke();
+  const yi=Math.max(0,Math.min(ps.length-1,RVYR.year-1)),x=X(yi),v=ps[yi][RVYR.seed-1];
+  g.setLineDash([3*dpr,3*dpr]);g.beginPath();g.moveTo(x,T);g.lineTo(x,T+ph);g.stroke();g.setLineDash([]);
+  if(v!=null){g.fillStyle="#fff";g.beginPath();g.arc(x,Y(v),3*dpr,0,6.2832);g.fill();}
+  const WW=RVYR.series&&RVYR.series.W;   // POPFISH3 : un point par crue (hiver / printemps / automne), en haut du graphique
+  if(WW){const rw={H:0,P:1,A:2};for(let y=0;y<WW.length;y++){const c=WW[y]&&WW[y].c;if(!c)continue;for(const ch of c){if(!RVYR_CR[ch])continue;g.fillStyle=RVYR_CR[ch].c;g.beginPath();g.arc(X(y),T+(3+rw[ch]*5)*dpr,1.8*dpr,0,6.2832);g.fill();}}}
+  g.restore();}
+function rvYrRedraw(){if(!RVUI.open)return;document.querySelectorAll("#rvCh canvas.rvc").forEach(cv=>{if(cv._tip&&cv._tip.draw)cv._tip.draw(cv._hv==null?null:cv._hv);});}
+/* ===== FIN BLOC POPFISH2 ===== */
+/* ===== BLOC POPFISH3 : pourquoi les courbes montent ou descendent ===== */
+/* Le moteur tire chaque annee un regime de debits par saison et d'eventuelles crues fortes (flowInfo) : on releve, pour la trajectoire montree, le type de crue (H hiver, P printemps, A automne), le pic de temperature de l'ete
+   , la force de chaque crue (0,3 a 1) et les debits (relatifs a l'etiage). Effets du modele [M] : hiver = pertes d'oeufs de crueOeuf[0] a crueOeuf[0]+(crueOeuf[1]-crueOeuf[0])*force (tirage au hasard dans cet intervalle) ; printemps = 0+ emportes de 50 a 100 % de crueJ0*force ; automne = aucun effet direct.
+   Decalage : une crue d'hiver creuse les oeufs la meme annee, puis les 0+, puis les 1+ (un an apres) et les adultes (deux ans apres). */
+const RVYR_CR={H:{c:"#5aa9e6",k:"hiver",n:{fr:"hiver",en:"winter"}},P:{c:"#6fcf97",k:"printemps",n:{fr:"printemps",en:"spring"}},A:{c:"#f2994a",k:"automne",n:{fr:"automne",en:"autumn"}}};
+function rvYrCause(S){
+  const w=S.W&&S.W[Math.max(0,Math.min(S.W.length-1,RVYR.year-1))];if(!w)return "";
+  const num=(v,d)=>{const s=v.toFixed(d);return LANG==="fr"?s.replace(".",","):s;},pc=x=>Math.round(100*x);
+  const fl=[...(w.c||"")].filter(ch=>RVYR_CR[ch]).map(ch=>{const f=RVYR_CR[ch],sv=w.s?w.s[f.k]:0;let e="";
+    if(ch==="H"){const lo=RVPAR.crueOeuf[0],hi=lo+(RVPAR.crueOeuf[1]-lo)*sv;e=L({fr:"œufs −",en:"eggs −"})+pc(lo)+L({fr:" à −",en:" to −"})+pc(hi)+" %";}
+    else if(ch==="P"){e=L({fr:"0+ −",en:"0+ −"})+pc(0.5*RVPAR.crueJ0*sv)+L({fr:" à −",en:" to −"})+pc(RVPAR.crueJ0*sv)+" %";}
+    else e=L({fr:"sans effet direct",en:"no direct effect"});
+    return '<span style="color:'+f.c+'">\u25cf</span> '+L(f.n)+" ("+L({fr:"force ",en:"strength "})+num(sv,2)+" : "+e+")";});
+  let h=L({fr:"Année ",en:"Year "})+RVYR.year+" \u00b7 "+(fl.length?L({fr:"crue : ",en:"flood: "})+fl.join(" + "):L({fr:"aucune crue forte",en:"no strong flood"}));
+  if(typeof w.T==="number")h+=" \u00b7 "+L({fr:"pic d'été ",en:"summer peak "})+num(w.T,1)+" °C"+(w.T>19.5?L({fr:" (stress > 19,5)",en:" (stress > 19.5)"}):"");
+  if(w.q&&typeof w.q.ete==="number")h+=" \u00b7 "+L({fr:"débit d'été ×",en:"summer flow ×"})+num(w.q.ete,1);
+  return h;}
+/* ===== FIN BLOC POPFISH3 ===== */
 function rvYrShow(){const d=document.getElementById("rvYear");if(d)d.style.display=RVFI.on?"flex":"none";}
 (function(){
   const d=document.createElement("div");d.id="rvYear";
-  d.innerHTML='<button id="rvYp"></button><span data-t="yrLab"></span><b id="rvYv"></b><input type="range" id="rvYs" min="1" max="'+RVUI.ans+'" step="1" value="'+RVYR.year+'"><span id="rvYn"></span>';
+  d.innerHTML='<button id="rvYp"></button><span data-t="yrLab"></span><b id="rvYv"></b><input type="range" id="rvYs" min="1" max="'+RVUI.ans+'" step="1" value="'+RVYR.year+'"><label id="rvYgl"><span data-t="yrTraj"></span> <select id="rvYg"></select></label><button id="rvYf">–</button><span id="rvYc"></span><span id="rvYn"></span>';
   document.body.appendChild(d);
-  document.getElementById("rvYs").oninput=e=>{RVYR.year=+e.target.value;RVYR.play=false;RVYR.acc=0;};
+  document.getElementById("rvYs").oninput=e=>{RVYR.year=+e.target.value;RVYR.play=false;RVYR.acc=0;rvYrRedraw();};
   document.getElementById("rvYp").onclick=()=>{RVYR.play=!RVYR.play;RVYR.acc=0;rvYrTxt();};
+  {const f=document.getElementById("rvYf");f.onclick=()=>{RVYR.fold=!RVYR.fold;d.classList.toggle("fold",RVYR.fold);f.textContent=RVYR.fold?"+":"–";};}
+  {const sg=document.getElementById("rvYg");for(let q=1;q<=RVUI.n;q++){const op=document.createElement("option");op.value=q;op.textContent=q;sg.appendChild(op);}sg.value=RVYR.seed;sg.onchange=e=>{RVYR.seed=+e.target.value;rvYrRedraw();};}
   rvYrTxt();rvYrShow();
 })();
 /* ===== FIN BLOC POPFISH1 ===== */
@@ -5389,12 +5514,12 @@ function rvFishTick(dt){
 }
 (function(){const a=document.getElementById("ckFish");if(a)a.onchange=()=>{RVFI.on=a.checked;rvYrShow();};})();
 /* ===== FIN BLOC FISH1 ===== */
+/* ##### GROUPE : Console et curseurs de taille ##### */
 /* ===== BLOC DEBUG1 : acces console (le script n'est pas global : FISH3D et HY n'y sont pas visibles) ===== */
 window.RVDBG={get HY(){return HY;},FISH3D:FISH3D,RVFI:RVFI,ST:ST,UW:UW};
 /* ===== FIN BLOC DEBUG1 ===== */
 
 /* ===== BLOC TAILLES1 (curseurs) ===== */
-Object.assign(I18N,{rkSize:{fr:"Taille des blocs",en:"Boulder size"},plSize:{fr:"Taille des roseaux et renoncules",en:"Reed and water-crowfoot size"}});
 rvSlide("sRkS","vRkS",()=>RVRKS.size,v=>{RVRKS.size=v;},v=>"\u00d7"+v.toFixed(2),()=>rvHabRebuild(["rochers","eau","remous","herbiers"],true));
 rvSlide("sPlS","vPlS",()=>RVPLS.size,v=>{RVPLS.size=v;},v=>"\u00d7"+v.toFixed(2),()=>rvHabRebuild(["herbes","herbiers"]));
 /* ===== FIN BLOC TAILLES1 (curseurs) ===== */
@@ -5555,7 +5680,8 @@ function showCard(id){
   const c=$("card");
   c.innerHTML='<button class="x" id="cardX">×</button><h2 style="color:'+d.c+'">'+esc(L(d.n))+'</h2>'+
     '<p>'+esc(L(d.d))+'</p><div class="mec"><b>'+esc(t("mecanisme"))+'</b> '+esc(L(d.m))+'</div>'+
-    '<ul>'+L(d.f).map(x=>'<li>'+esc(x)+'</li>').join("")+'</ul><div class="warn">⚠ '+esc(t("nonVerif"))+'</div>';
+    '<ul>'+L(d.f).map(x=>'<li>'+esc(x)+'</li>').join("")+'</ul>'+
+    (d.s&&d.s.length?'<div class="src"><b>'+esc(t("srcT"))+'</b> '+d.s.slice().sort((x,y)=>rvRefNum(x)-rvRefNum(y)).map(rvRefLink).join(" · ")+'</div>':"")+(d.mod?'<div class="note">'+esc(t("modelNote"))+'</div>':"");
   c.style.display="block";document.body.classList.add("card-open");
   $("cardX").onclick=closeCard;
   document.querySelectorAll(".lbl").forEach(b=>b.classList.toggle("sel",b.dataset.id===id));
